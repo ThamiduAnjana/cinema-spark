@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { HeroBanner } from "@/components/HeroBanner";
+import { HeroSlider } from "@/components/HeroSlider";
 import { QuickBookBar } from "@/components/QuickBookBar";
 import { NowShowingSection } from "@/components/NowShowingSection";
 import { ComingSoonSection } from "@/components/ComingSoonSection";
@@ -14,7 +14,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">
-        <HeroBanner />
+        <HeroSlider />
         <QuickBookBar activeTab={activeTab} onTabChange={setActiveTab} />
         
         {activeTab === "now-showing" && <NowShowingSection />}

@@ -204,7 +204,8 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                     <Button
                       onClick={() => {
                         onClose();
-                        navigate(`/movie-booking?movie=${movie.id}`);
+                        const movieRef = (movie as any).ref || movie.id;
+                        navigate(`/movie-booking/${movieRef}`);
                       }}
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
                     >
@@ -368,7 +369,8 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                 <Button 
                   onClick={() => {
                     onClose();
-                    navigate(`/movie-booking?movie=${movie.id}`);
+                    const movieRef = (movie as any).ref || movie.id;
+                    navigate(`/movie-booking/${movieRef}`);
                   }}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 rounded-lg"
                 >

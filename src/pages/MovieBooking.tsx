@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { nowShowingMovies, featuredMovie } from "@/data/movies";
 import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MovieCard } from "@/components/MovieCard";
 
 // Cinema data with showtimes
 const cinemaData = [
@@ -45,14 +46,10 @@ const cinemaData = [
   }
 ];
 
-// Also showing movies
-const alsoShowingMovies = [
-  { id: "as1", title: "SIRAI", genre: "DRAMA", language: "Tamil", rating: "U", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop" },
-  { id: "as2", title: "THE SPONGEBOB MOVIE: SEARCH...", genre: "ANIMATION", language: "English", rating: "U", poster: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop" },
-  { id: "as3", title: "THE HOUSEMAID", genre: "THRILLER", language: "English", rating: "X", poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop" },
-  { id: "as4", title: "MALAKI DUWE NUMBA", genre: "DRAMA", language: "Sinhala", rating: "U", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=600&fit=crop" },
-  { id: "as5", title: "CYANIDE", genre: "DRAMA", language: "Sinhala", rating: "U", poster: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=400&h=600&fit=crop" },
-];
+// Also showing movies - filter out current movie
+const getAlsoShowingMovies = (currentMovieId: string) => {
+  return nowShowingMovies.filter(m => m.id !== currentMovieId).slice(0, 5);
+};
 
 // Generate dates for the next 7 days
 const generateDates = () => {
@@ -331,39 +328,8 @@ export default function MovieBooking() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {alsoShowingMovies.map((movie) => (
-              <div key={movie.id} className="group">
-                {/* Poster with Play Button */}
-                <div className="relative aspect-[2/3] rounded-lg overflow-hidden mb-2">
-                  <img 
-                    src={movie.poster} 
-                    alt={movie.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {/* Play Button Overlay */}
-                  <button className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-100 transition-opacity">
-                    <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center border-2 border-white">
-                      <Play className="w-5 h-5 text-white fill-white ml-1" />
-                    </div>
-                  </button>
-                </div>
-                
-                {/* Book Button */}
-                <button 
-                  onClick={() => navigate(`/movie-booking?movie=${movie.id}`)}
-                  className="w-full py-2 bg-[#1a1a2e] text-white text-sm font-medium rounded-md border border-white/20 hover:bg-white/10 transition-colors mb-3"
-                >
-                  Book
-                </button>
-                
-                {/* Movie Info */}
-                <h3 className="font-bold text-white text-sm uppercase tracking-wide line-clamp-2">{movie.title}</h3>
-                <p className="text-amber-400 text-xs mt-1">({movie.rating})</p>
-                <p className="text-cyan-400 text-xs mt-0.5">{movie.language}</p>
-                <Badge className="mt-2 bg-transparent border border-cyan-500 text-cyan-400 text-[10px] px-2 py-0.5 font-medium">
-                  {movie.genre.toUpperCase()}
-                </Badge>
-              </div>
+            {getAlsoShowingMovies(movieId).map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
             ))}
           </div>
         </div>

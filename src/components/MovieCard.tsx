@@ -25,8 +25,9 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
 
   const handleBookNow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Use movie ref for routing
-    navigate(`/movie-booking/${movie.ref}`);
+    // Use movie ref or id for routing
+    const movieRef = (movie as any).ref || movie.id;
+    navigate(`/movie-booking/${movieRef}`);
   };
 
   const isUpcoming = movie.movieType === "upcoming";

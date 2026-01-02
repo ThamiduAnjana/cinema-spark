@@ -50,7 +50,6 @@ export function formatRuntime(minutes: number | null): string {
 export function transformApiMovie(movie: ApiMovie, movieType?: MovieType) {
   return {
     id: String(movie.id),
-    ref: movie.movie_ref,
     title: movie.title,
     tagline: movie.tagline,
     description: movie.description || "",
@@ -77,7 +76,7 @@ export type TransformedMovie = ReturnType<typeof transformApiMovie>;
 export function transformApiMovieWithShowtimes(movie: ApiMovieWithShowtimes) {
   return {
     id: String(movie.id),
-    ref: movie.movie_ref,
+    ref: movie.ref,
     title: movie.title,
     tagline: movie.tagline,
     description: movie.description || "",

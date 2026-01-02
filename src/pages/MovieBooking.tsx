@@ -1,14 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft, User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { nowShowingMovies, featuredMovie } from "@/data/movies";
+import { nowShowingMovies, featuredMovie, Movie } from "@/data/movies";
 import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MovieCard } from "@/components/MovieCard";
+import { TransformedMovie } from "@/services/movie-service";
 
+// Helper to convert legacy Movie type to TransformedMovie for MovieCard compatibility
+function toTransformedMovie(movie: Movie): TransformedMovie {
+  return {
+    id: movie.id,
+    title: movie.title,
+    tagline: null,
+    description: movie.description,
+    runtime: movie.duration,
+    runtimeMinutes: null,
+    language: movie.language,
+    rating: movie.rating,
+    releaseDate: movie.releaseDate,
+    genres: movie.genre,
+    poster: movie.poster,
+    backdrop: movie.backdrop,
+    galleryImages: [],
+    cast: [],
+    crew: [],
+    trailerUrl: movie.trailerUrl || null,
+  };
+}
 // Cinema data with showtimes
 const cinemaData = [
   {
@@ -328,7 +350,7 @@ export default function MovieBooking() {
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {getAlsoShowingMovies(movieId).map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+              <MovieCard key={movie.id} movie={toTransformedMovie(movie)} />
             ))}
           </div>
         </div>

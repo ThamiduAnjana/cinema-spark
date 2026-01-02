@@ -3,89 +3,83 @@ import { useNavigate } from "react-router-dom";
 import { Play, Clock, Calendar, Globe, Film, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-
-interface HeroMovie {
-  id: number;
-  title: string;
-  duration: string;
-  releaseDate: string;
-  genre: string[];
-  language: string;
-  description: string;
-  poster: string;
-  backdrop: string;
-  rating: number;
-}
-
-const heroMovies: HeroMovie[] = [
-  {
-    id: 1,
-    title: "AVATAR: FIRE AND ASH",
-    duration: "3h 10m",
-    releaseDate: "Dec 19, 2025",
-    genre: ["Action", "Adventure", "Fantasy"],
-    language: "English, Tamil",
-    description: "A new threat rises on Pandora as ancient forces awaken and the battle for survival begins.",
-    poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&h=600&fit=crop",
-    backdrop: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&h=1080&fit=crop",
-    rating: 9.2,
-  },
-  {
-    id: 2,
-    title: "THE HOUSEMAID",
-    duration: "1h 50m",
-    releaseDate: "Jan 15, 2026",
-    genre: ["Thriller", "Mystery"],
-    language: "English",
-    description: "A seemingly perfect home hides terrifying secrets behind closed doors.",
-    poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop",
-    backdrop: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&h=1080&fit=crop",
-    rating: 8.5,
-  },
-  {
-    id: 3,
-    title: "SPONGEBOB MOVIE",
-    duration: "1h 45m",
-    releaseDate: "Feb 28, 2026",
-    genre: ["Animation", "Comedy"],
-    language: "English",
-    description: "SpongeBob and friends embark on a hilarious adventure across the ocean.",
-    poster: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop",
-    backdrop: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop",
-    rating: 7.8,
-  },
-];
+import { useNowShowingMovies } from "@/hooks/use-movies";
+import { TransformedMovie } from "@/services/movie-service";
 
 export function HeroSlider() {
   const navigate = useNavigate();
+  const { movies, isLoading, isError } = useNowShowingMovies(1, 5);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Reset slide index when movies change
+  useEffect(() => {
+    if (movies.length > 0 && currentSlide >= movies.length) {
+      setCurrentSlide(0);
+    }
+  }, [movies.length, currentSlide]);
+
   const goToSlide = useCallback((index: number) => {
-    if (isAnimating) return;
+    if (isAnimating || movies.length === 0) return;
     setIsAnimating(true);
     setCurrentSlide(index);
     setTimeout(() => setIsAnimating(false), 700);
-  }, [isAnimating]);
+  }, [isAnimating, movies.length]);
 
   const nextSlide = useCallback(() => {
-    goToSlide((currentSlide + 1) % heroMovies.length);
-  }, [currentSlide, goToSlide]);
+    if (movies.length === 0) return;
+    goToSlide((currentSlide + 1) % movies.length);
+  }, [currentSlide, goToSlide, movies.length]);
 
   const prevSlide = useCallback(() => {
-    goToSlide((currentSlide - 1 + heroMovies.length) % heroMovies.length);
-  }, [currentSlide, goToSlide]);
+    if (movies.length === 0) return;
+    goToSlide((currentSlide - 1 + movies.length) % movies.length);
+  }, [currentSlide, goToSlide, movies.length]);
 
   // Auto-slide
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || movies.length === 0) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [nextSlide, isPaused]);
+  }, [nextSlide, isPaused, movies.length]);
 
-  const movie = heroMovies[currentSlide];
+  // Loading state
+  if (isLoading) {
+    return (
+      <section className="relative h-[75vh] min-h-[550px] max-h-[850px] w-full bg-[#0B0D14] flex items-center justify-center">
+        <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+          <div className="flex-1 space-y-4 w-full max-w-xl">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-16 w-full" />
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+            </div>
+            <Skeleton className="h-20 w-full" />
+          </div>
+          <Skeleton className="w-48 sm:w-56 md:w-64 lg:w-72 aspect-[2/3] rounded-xl" />
+        </div>
+      </section>
+    );
+  }
+
+  // Error or empty state - show fallback
+  if (isError || movies.length === 0) {
+    return (
+      <section className="relative h-[75vh] min-h-[550px] max-h-[850px] w-full bg-[#0B0D14] flex items-center justify-center">
+        <div className="text-center text-white">
+          <Film className="w-16 h-16 mx-auto mb-4 opacity-50" />
+          <p className="text-xl">No movies available</p>
+        </div>
+      </section>
+    );
+  }
+
+  const movie = movies[currentSlide];
 
   return (
     <section 
@@ -95,7 +89,7 @@ export function HeroSlider() {
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Background Slides with Inline Background Images */}
-      {heroMovies.map((m, index) => (
+      {movies.map((m, index) => (
         <div
           key={m.id}
           data-backdrop={m.backdrop}
@@ -183,12 +177,14 @@ export function HeroSlider() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 md:gap-5 text-white/80 text-sm md:text-base">
               <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
                 <Clock className="h-4 w-4 text-primary" />
-                {movie.duration}
+                {movie.runtime}
               </span>
-              <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                <Calendar className="h-4 w-4 text-primary" />
-                {movie.releaseDate}
-              </span>
+              {movie.releaseDate && (
+                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  {movie.releaseDate}
+                </span>
+              )}
               <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
                 <Globe className="h-4 w-4 text-primary" />
                 {movie.language}
@@ -197,7 +193,7 @@ export function HeroSlider() {
 
             {/* Genres */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-              {movie.genre.map((g) => (
+              {movie.genres.map((g) => (
                 <Badge
                   key={g}
                   variant="outline"
@@ -222,14 +218,16 @@ export function HeroSlider() {
               >
                 Book Now
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/40 text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm px-6 py-6 text-base md:text-lg transition-all duration-300 hover:scale-105 gap-2"
-              >
-                <Play className="h-5 w-5 fill-current" />
-                Watch Trailer
-              </Button>
+              {movie.trailerUrl && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/40 text-white bg-white/5 hover:bg-white/20 backdrop-blur-sm px-6 py-6 text-base md:text-lg transition-all duration-300 hover:scale-105 gap-2"
+                >
+                  <Play className="h-5 w-5 fill-current" />
+                  Watch Trailer
+                </Button>
+              )}
             </div>
           </div>
 
@@ -251,16 +249,20 @@ export function HeroSlider() {
                 />
                 
                 {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:scale-110 transition-transform cursor-pointer">
-                    <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
+                {movie.trailerUrl && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 hover:scale-110 transition-transform cursor-pointer">
+                      <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Rating Badge */}
-                <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold text-sm shadow-lg flex items-center gap-1">
-                  <span className="text-white">★</span> {movie.rating}
-                </div>
+                {movie.rating > 0 && (
+                  <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1.5 rounded-full font-bold text-sm shadow-lg flex items-center gap-1">
+                    <span className="text-white">★</span> {movie.rating}
+                  </div>
+                )}
                 
                 {/* Floating Badge */}
                 <div className="absolute -bottom-3 -left-3 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-lg text-xs font-medium border border-white/20 shadow-lg">
@@ -273,47 +275,53 @@ export function HeroSlider() {
       </div>
 
       {/* Navigation Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group z-10"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-6 w-6 md:h-7 md:w-7 text-white group-hover:text-primary transition-colors" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group z-10"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-6 w-6 md:h-7 md:w-7 text-white group-hover:text-primary transition-colors" />
-      </button>
+      {movies.length > 1 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group z-10"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-6 w-6 md:h-7 md:w-7 text-white group-hover:text-primary transition-colors" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 group z-10"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-6 w-6 md:h-7 md:w-7 text-white group-hover:text-primary transition-colors" />
+          </button>
+        </>
+      )}
 
       {/* Dot Indicators */}
-      <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-        {heroMovies.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={cn(
-              "h-2.5 rounded-full transition-all duration-300",
-              index === currentSlide 
-                ? "w-8 bg-primary shadow-lg shadow-primary/50" 
-                : "w-2.5 bg-white/40 hover:bg-white/60"
-            )}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      {movies.length > 1 && (
+        <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+          {movies.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={cn(
+                "h-2.5 rounded-full transition-all duration-300",
+                index === currentSlide 
+                  ? "w-8 bg-primary shadow-lg shadow-primary/50" 
+                  : "w-2.5 bg-white/40 hover:bg-white/60"
+              )}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
         <div 
           className={cn(
             "h-full bg-primary transition-all",
-            !isPaused && "animate-progress"
+            !isPaused && movies.length > 1 && "animate-progress"
           )}
           style={{ 
-            width: isPaused ? `${((currentSlide + 1) / heroMovies.length) * 100}%` : undefined 
+            width: isPaused || movies.length <= 1 ? `${((currentSlide + 1) / movies.length) * 100}%` : undefined 
           }}
         />
       </div>

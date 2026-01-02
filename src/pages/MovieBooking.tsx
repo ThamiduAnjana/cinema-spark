@@ -86,9 +86,8 @@ export default function MovieBooking() {
   const movie = movieId === '1' ? featuredMovie : nowShowingMovies.find(m => m.id === movieId) || featuredMovie;
 
   const handleTimeslotClick = (cinema: string, format: string, time: string, language: string) => {
-    console.log(`Selected: ${cinema} - ${format} - ${time} - ${language}`);
-    // Navigate to seat selection (placeholder for now)
-    alert(`Booking ${movie.title} at ${time} (${language}) - ${format}\nCinema: ${cinema}\n\nSeat selection coming soon!`);
+    // Navigate to seat selection page with all relevant params
+    navigate(`/select-seats?movie=${movieId}&cinema=${encodeURIComponent(cinema)}&time=${encodeURIComponent(time)}&format=${encodeURIComponent(format)}&language=${encodeURIComponent(language)}`);
   };
 
   return (

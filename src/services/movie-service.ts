@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/api-config";
-import { MoviesApiResponse, MovieType, ApiMovie } from "@/types/api";
+import { MoviesApiResponse, MovieType, ApiMovie, BookingMoviesApiResponse, ApiMovieWithShowtimes } from "@/types/api";
 
 interface FetchMoviesParams {
   page?: number;
@@ -21,6 +21,16 @@ export async function fetchMovies({
 
   if (!response.ok) {
     throw new Error(`Failed to fetch movies: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchBookingMovies(): Promise<BookingMoviesApiResponse> {
+  const response = await fetch(API_ENDPOINTS.bookingMovies);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch booking movies: ${response.status} ${response.statusText}`);
   }
 
   return response.json();
@@ -61,3 +71,31 @@ export function transformApiMovie(movie: ApiMovie, movieType?: MovieType) {
 }
 
 export type TransformedMovie = ReturnType<typeof transformApiMovie>;
+
+// Transform API movie with showtimes for booking page
+export function transformApiMovieWithShowtimes(movie: ApiMovieWithShowtimes) {
+  return {
+    id: String(movie.id),
+    ref: movie.ref,
+    title: movie.title,
+    tagline: movie.tagline,
+    description: movie.description || "",
+    runtime: formatRuntime(movie.runtime),
+    runtimeMinutes: movie.runtime,
+    language: movie.language,
+    rating: movie.rating || 0,
+    releaseDate: movie.release_date || "",
+    genres: movie.genres || [],
+    poster: movie.poster_media?.url || "",
+    backdrop: movie.backdrop_media?.url || "",
+    galleryImages: movie.gallery_medias?.map((m) => m.url) || [],
+    cast: movie.cast_details || [],
+    crew: movie.crew_details || [],
+    productionCompanies: movie.production_companies || [],
+    trailerUrl: movie.trailer_url,
+    movieType: movie.type || "now_showing",
+    theaters: movie.theaters || [],
+  };
+}
+
+export type TransformedMovieWithShowtimes = ReturnType<typeof transformApiMovieWithShowtimes>;

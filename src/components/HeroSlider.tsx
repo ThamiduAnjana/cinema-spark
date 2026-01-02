@@ -221,7 +221,7 @@ export function HeroSlider() {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                 <Button
                   size="lg"
-                  onClick={() => navigate(`/movie-booking?movie=${movie.id}`)}
+                  onClick={() => navigate(`/movie-booking/${movie.ref}`)}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-base md:text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
                 >
                   Book Now

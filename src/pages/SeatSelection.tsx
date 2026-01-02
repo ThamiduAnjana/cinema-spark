@@ -311,7 +311,7 @@ export default function SeatSelection() {
             {/* Left: Back + Breadcrumb */}
             <div className="flex items-center gap-6">
               <button 
-                onClick={() => navigate(`/movie-booking?movie=${movieId}`)}
+                onClick={() => navigate(`/movie-booking/${movieId}`)}
                 className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />

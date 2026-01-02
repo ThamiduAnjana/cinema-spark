@@ -54,6 +54,7 @@ const groupShowtimesByFormat = (showtimes: Showtime[]) => {
 function toTransformedMovie(movie: TransformedMovieWithShowtimes): TransformedMovie {
   return {
     id: movie.id,
+    ref: movie.ref,
     title: movie.title,
     tagline: movie.tagline,
     description: movie.description,

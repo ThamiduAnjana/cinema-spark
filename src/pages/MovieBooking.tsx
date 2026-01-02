@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft, User } from "lucide-react";
+import { ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft, User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -98,7 +98,28 @@ export default function MovieBooking() {
     <div className="min-h-screen bg-[#0B0D14]">
       {/* Header */}
       <header className="bg-[#0B0D14] border-b border-white/10 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-end">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Left: Back + Breadcrumb */}
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm">BACK</span>
+            </button>
+            
+            {/* Breadcrumb */}
+            <nav className="hidden md:flex items-center gap-3 text-sm">
+              <span className="text-amber-400 font-medium border-b-2 border-amber-400 pb-1">CHOOSE CINEMA</span>
+              <ChevronRight className="w-4 h-4 text-white/40" />
+              <span className="text-white/40">SELECT SEATS</span>
+              <ChevronRight className="w-4 h-4 text-white/40" />
+              <span className="text-white/40">PAYMENT</span>
+            </nav>
+          </div>
+          
+          {/* Right: Location, Theme, Login */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-white/80">
               <MapPin className="w-4 h-4" />

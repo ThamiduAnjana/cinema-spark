@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { MovieDetailsModal } from "./MovieDetailsModal";
 import { TransformedMovie } from "@/services/movie-service";
+import { Film, CalendarClock } from "lucide-react";
 
 interface MovieCardProps {
   movie: TransformedMovie;
+  showTypeBadge?: boolean;
 }
 
-export function MovieCard({ movie }: MovieCardProps) {
+export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -25,6 +27,8 @@ export function MovieCard({ movie }: MovieCardProps) {
     e.stopPropagation();
     navigate(`/movie-booking?movie=${movie.id}`);
   };
+
+  const isUpcoming = movie.movieType === "upcoming";
 
   return (
     <>
@@ -55,7 +59,7 @@ export function MovieCard({ movie }: MovieCardProps) {
                 onClick={handleBookNow}
                 className="w-full py-2 bg-primary text-primary-foreground rounded-md font-semibold text-sm hover:bg-primary/90 transition-colors"
               >
-                Book Now
+                {isUpcoming ? "Notify Me" : "Book Now"}
               </button>
             </div>
           </div>
@@ -63,6 +67,26 @@ export function MovieCard({ movie }: MovieCardProps) {
           {movie.rating > 0 && (
             <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-bold">
               ★ {movie.rating}
+            </div>
+          )}
+          {/* Movie Type Badge */}
+          {showTypeBadge && (
+            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 ${
+              isUpcoming 
+                ? "bg-amber-500 text-black" 
+                : "bg-green-600 text-white"
+            }`}>
+              {isUpcoming ? (
+                <>
+                  <CalendarClock className="w-3 h-3" />
+                  Upcoming
+                </>
+              ) : (
+                <>
+                  <Film className="w-3 h-3" />
+                  Now Showing
+                </>
+              )}
             </div>
           )}
         </div>

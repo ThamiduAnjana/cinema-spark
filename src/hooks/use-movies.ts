@@ -37,7 +37,7 @@ export function useMovies({
     gcTime: 10 * 60 * 1000, // Keep in garbage collection for 10 minutes
   });
 
-  const movies = query.data?.data?.data?.map(transformApiMovie) || [];
+  const movies = query.data?.data?.data?.map((movie) => transformApiMovie(movie, type)) || [];
   const paginationData = query.data?.data;
 
   return {

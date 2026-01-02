@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, User, Menu, X, Film } from "lucide-react";
+import { Search, MapPin, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,11 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "./ThemeToggle";
+import sasPlazaLogo from "@/assets/sas-plaza-logo.jpg";
 
-const cities = ["Colombo", "Kandy", "Galle", "Negombo", "Jaffna"];
+const cities = ["Trincomalee", "Colombo", "Kandy", "Galle", "Jaffna"];
 
 export function Header() {
-  const [selectedCity, setSelectedCity] = useState("Colombo");
+  const [selectedCity, setSelectedCity] = useState("Trincomalee");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -22,13 +23,12 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
-              <Film className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-display font-bold text-hero-foreground hidden sm:block">
-              CinePlex
-            </span>
+          <a href="/" className="flex items-center shrink-0">
+            <img 
+              src={sasPlazaLogo} 
+              alt="SAS Plaza - Trincomalee, Sri Lanka" 
+              className="h-12 w-auto object-contain"
+            />
           </a>
 
           {/* Search Bar - Desktop */}

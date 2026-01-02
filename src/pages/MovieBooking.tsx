@@ -107,7 +107,7 @@ export default function MovieBooking() {
             
             {/* Breadcrumb */}
             <nav className="hidden md:flex items-center gap-3 text-sm">
-              <span className="text-amber-400 font-medium border-b-2 border-amber-400 pb-1">CHOOSE CINEMA</span>
+              <span className="text-primary font-medium border-b-2 border-primary pb-1">CHOOSE CINEMA</span>
               <ChevronRight className="w-4 h-4 text-white/40" />
               <span className="text-white/40">SELECT SEATS</span>
               <ChevronRight className="w-4 h-4 text-white/40" />
@@ -184,7 +184,7 @@ export default function MovieBooking() {
                 <span>{movie.language}</span>
               </div>
               
-              <Badge className="bg-amber-600 text-white hover:bg-amber-700 mb-4">
+              <Badge className="bg-primary text-white hover:bg-primary/90 mb-4">
                 LIVE
               </Badge>
               
@@ -207,7 +207,7 @@ export default function MovieBooking() {
                 className={cn(
                   "flex flex-col items-center px-4 py-3 rounded-lg min-w-[80px] transition-all",
                   selectedDate === date.id 
-                    ? "bg-amber-500 text-black" 
+                    ? "bg-primary text-white" 
                     : "bg-white/5 text-white/70 hover:bg-white/10"
                 )}
               >
@@ -229,7 +229,7 @@ export default function MovieBooking() {
               Available
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-amber-500" />
+              <span className="w-3 h-3 rounded-sm bg-primary" />
               Filling Fast
             </span>
             <span className="flex items-center gap-1.5">
@@ -253,20 +253,20 @@ export default function MovieBooking() {
       <section className="py-6">
         <div className="container mx-auto px-4">
           {cinemaData.map((cinema) => (
-            <div key={cinema.id} className="bg-[#FFF8E7] rounded-xl overflow-hidden mb-6">
+            <div key={cinema.id} className="bg-[#1A1D25] border border-white/10 rounded-xl overflow-hidden mb-6">
               {/* Cinema Header */}
-              <div className="flex items-center justify-between p-4 border-b border-amber-200/50">
+              <div className="flex items-center justify-between p-4 border-b border-white/10">
                 <div>
-                  <h3 className="font-bold text-gray-900">{cinema.name}</h3>
-                  <p className="text-xs text-gray-500">{cinema.address}</p>
+                  <h3 className="font-bold text-white">{cinema.name}</h3>
+                  <p className="text-xs text-white/50">{cinema.address}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500">{cinema.distance}</span>
-                  <button className="p-2 hover:bg-amber-100 rounded-full transition-colors">
-                    <Navigation className="w-4 h-4 text-gray-400" />
+                  <span className="text-xs text-white/50">{cinema.distance}</span>
+                  <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <Navigation className="w-4 h-4 text-white/60" />
                   </button>
-                  <button className="p-2 hover:bg-amber-100 rounded-full transition-colors">
-                    <Heart className="w-4 h-4 text-gray-400" />
+                  <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <Heart className="w-4 h-4 text-white/60" />
                   </button>
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function MovieBooking() {
               <div className="p-4 space-y-6">
                 {cinema.formats.map((format) => (
                   <div key={format.name}>
-                    <h4 className="text-xs font-bold text-gray-600 mb-3">{format.name}</h4>
+                    <h4 className="text-xs font-bold text-white/70 mb-3">{format.name}</h4>
                     <div className="flex flex-wrap gap-3">
                       {format.showtimes.map((showtime, idx) => (
                         <button
@@ -286,17 +286,17 @@ export default function MovieBooking() {
                             "flex flex-col items-center px-4 py-2 rounded-lg border-2 min-w-[100px] transition-all",
                             showtime.available 
                               ? showtime.fillingFast
-                                ? "border-amber-500 bg-amber-50 hover:bg-amber-100 cursor-pointer"
-                                : "border-green-500 bg-green-50 hover:bg-green-100 cursor-pointer"
-                              : "border-gray-300 bg-gray-100 cursor-not-allowed opacity-50"
+                                ? "border-primary/80 bg-primary/10 hover:bg-primary/20 cursor-pointer"
+                                : "border-green-500/80 bg-green-500/10 hover:bg-green-500/20 cursor-pointer"
+                              : "border-white/20 bg-white/5 cursor-not-allowed opacity-50"
                           )}
                         >
-                          <span className="text-[10px] text-gray-600 font-medium">{showtime.language}</span>
+                          <span className="text-[10px] text-white/60 font-medium">{showtime.language}</span>
                           <span className={cn(
                             "text-sm font-bold",
                             showtime.available 
-                              ? showtime.fillingFast ? "text-amber-600" : "text-green-600"
-                              : "text-gray-400"
+                              ? showtime.fillingFast ? "text-primary" : "text-green-500"
+                              : "text-white/30"
                           )}>
                             {showtime.time}
                           </span>

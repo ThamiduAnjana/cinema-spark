@@ -78,7 +78,7 @@ export default function MovieBooking() {
   const navigate = useNavigate();
   const { movieRef } = useParams<{ movieRef: string }>();
   
-  const { movie, allMovies, isLoading, error } = useMovieByRef(movieRef || "");
+  const { movie, allMovies, isLoading, error, isError, notFound } = useMovieByRef(movieRef || "");
   
   const [selectedDate, setSelectedDate] = useState("0");
   const [dates] = useState(generateDates);
@@ -113,8 +113,37 @@ export default function MovieBooking() {
     );
   }
 
-  // Error or not found state
-  if (error || !movie) {
+  // API Error state
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-[#0B0D14] flex flex-col">
+        <header className="bg-[#0B0D14] border-b border-white/10">
+          <div className="container mx-auto px-4 py-3">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm">BACK</span>
+            </button>
+          </div>
+        </header>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">Failed to Load Movie</h2>
+            <p className="text-white/60 mb-6">Unable to connect to the server. Please check your connection and try again.</p>
+            <Button onClick={() => window.location.reload()} className="bg-primary hover:bg-primary/90">
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Movie not found state (API succeeded but movie doesn't exist)
+  if (notFound) {
     return (
       <div className="min-h-screen bg-[#0B0D14] flex flex-col">
         <header className="bg-[#0B0D14] border-b border-white/10">
@@ -137,6 +166,27 @@ export default function MovieBooking() {
               Back to Home
             </Button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Still loading or no movie yet
+  if (!movie) {
+    return (
+      <div className="min-h-screen bg-[#0B0D14]">
+        <header className="bg-[#0B0D14] border-b border-white/10 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-32" />
+          </div>
+        </header>
+        <section className="relative">
+          <Skeleton className="h-[350px] w-full" />
+        </section>
+        <div className="container mx-auto px-4 py-6">
+          <Skeleton className="h-24 w-full mb-4" />
+          <Skeleton className="h-48 w-full" />
         </div>
       </div>
     );

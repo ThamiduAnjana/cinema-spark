@@ -39,11 +39,11 @@ interface SeatLayoutResponse {
   seats: SeatData[];
 }
 
-// Mock JSON API Response - VVIP and VIP sections
+// Mock JSON API Response - VVIP and VIP sections (based on image reference)
 const seatLayoutApiResponse: SeatLayoutResponse = {
   layout: {
-    total_rows: 7,
-    total_seats: 91,
+    total_rows: 12,
+    total_seats: 144,
   },
   seats: generateMockSeats(),
 };
@@ -52,47 +52,53 @@ function generateMockSeats(): SeatData[] {
   const seats: SeatData[] = [];
   const sections: Record<string, Section> = {
     VVIP: { section_id: 1, section_name: "VVIP", price: 3200.00, color: "#4A0E63" },
-    VIP: { section_id: 2, section_name: "VIP", price: 2500.00, color: "#EFBF04" },
+    VIP: { section_id: 2, section_name: "VIP", price: 2400.00, color: "#EFBF04" },
   };
   
-  // VVIP rows (A, B)
+  // VVIP rows (A, B) - bottom rows closest to screen
   const vvipRows = ["A", "B"];
-  // VIP rows (C, D, E, F, G)
-  const vipRows = ["C", "D", "E", "F", "G"];
+  // VIP rows (C, D, E, F, G, H, I, J, K, L)
+  const vipRows = ["C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
   
   // Occupied seats set
   const occupiedSeats = new Set([
-    "A5", "A6", "B3", "B9", "C2", "C10", "C11",
-    "D5", "D6", "E8", "E9", "F3", "F4", "F11",
-    "G1", "G7", "G12", "G13"
+    "A2", "A3", "A4", "A7", "A8", "B2", "B3", "B4", "B6", "B7", "B8",
+    "C3", "C4", "D3", "D4", "E5", "F6", "G3", "H4", "I2", "J5", "K6", "L3"
   ]);
   
   let seatId = 1;
   
-  // Generate VVIP seats
+  // Generate VVIP seats (rows A and B - fewer seats, centered)
   vvipRows.forEach((row) => {
-    for (let i = 1; i <= 13; i++) {
+    const seatsPerRow = 8;
+    for (let i = 1; i <= seatsPerRow; i++) {
       const seatKey = `${row}${i}`;
+      // Add center aisle gap after seat 4
+      const columnPos = i <= 4 ? i + 2 : i + 3;
       seats.push({
         seat_id: seatId++,
         row_label: row,
         seat_number: i,
-        column_position: i <= 4 ? i : (i <= 9 ? i + 1 : i + 2), // Add gaps for aisles
+        column_position: columnPos,
         status: occupiedSeats.has(seatKey) ? "occupied" : "available",
         section: sections.VVIP,
       });
     }
   });
   
-  // Generate VIP seats
+  // Generate VIP seats (rows C has 10 seats, D-L have 12 seats)
   vipRows.forEach((row) => {
-    for (let i = 1; i <= 13; i++) {
+    const seatsPerRow = row === "C" ? 10 : 12;
+    for (let i = 1; i <= seatsPerRow; i++) {
       const seatKey = `${row}${i}`;
+      // Add center aisle gap after seat 5 or 6 depending on row size
+      const midPoint = row === "C" ? 4 : 5;
+      const columnPos = i <= midPoint ? i : i + 1;
       seats.push({
         seat_id: seatId++,
         row_label: row,
         seat_number: i,
-        column_position: i <= 4 ? i : (i <= 9 ? i + 1 : i + 2), // Add gaps for aisles
+        column_position: columnPos,
         status: occupiedSeats.has(seatKey) ? "occupied" : "available",
         section: sections.VIP,
       });
@@ -182,85 +188,96 @@ export default function SeatSelection() {
     }));
   };
   
-  // Group seats by section and row
-  const seatsBySection = useMemo(() => {
-    const grouped: Record<string, { section: Section; rows: Record<string, SeatData[]> }> = {};
+  // Group seats by row (reversed order - L to A from top to bottom)
+  const seatsByRow = useMemo(() => {
+    const grouped: Record<string, { seats: SeatData[]; section: Section }> = {};
     
     seats.forEach(seat => {
-      const sectionName = seat.section.section_name;
-      if (!grouped[sectionName]) {
-        grouped[sectionName] = { section: seat.section, rows: {} };
+      if (!grouped[seat.row_label]) {
+        grouped[seat.row_label] = { seats: [], section: seat.section };
       }
-      if (!grouped[sectionName].rows[seat.row_label]) {
-        grouped[sectionName].rows[seat.row_label] = [];
-      }
-      grouped[sectionName].rows[seat.row_label].push(seat);
+      grouped[seat.row_label].seats.push(seat);
     });
     
-    // Sort seats within each row by column_position
-    Object.values(grouped).forEach(({ rows }) => {
-      Object.values(rows).forEach(rowSeats => {
-        rowSeats.sort((a, b) => a.column_position - b.column_position);
-      });
+    // Sort seats within each row by seat_number
+    Object.values(grouped).forEach(({ seats: rowSeats }) => {
+      rowSeats.sort((a, b) => a.seat_number - b.seat_number);
     });
     
     return grouped;
   }, [seats]);
 
-  // Render seats with aisle gaps
-  const renderSeatsWithAisles = (rowSeats: SeatData[], sectionColor: string) => {
-    const elements: JSX.Element[] = [];
-    let lastPosition = 0;
+  // Get row order (L to A - top to bottom)
+  const rowOrder = useMemo(() => {
+    return Object.keys(seatsByRow).sort((a, b) => b.localeCompare(a));
+  }, [seatsByRow]);
+
+  // Render individual seat with price
+  const renderSeat = (seat: SeatData) => {
+    const seatLabel = `${seat.row_label}${seat.seat_number}`;
+    const isVVIP = seat.section.section_name === "VVIP";
     
-    rowSeats.forEach((seat, index) => {
-      // Add aisle gap if there's a position jump
-      if (index > 0 && seat.column_position - lastPosition > 1) {
-        elements.push(
-          <div key={`aisle-${seat.seat_id}`} className="w-4" />
-        );
-      }
-      
-      elements.push(
-        <TooltipProvider key={seat.seat_id}>
-          <Tooltip delayDuration={100}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => handleSeatClick(seat.seat_id)}
-                disabled={seat.status === "occupied"}
-                style={{
-                  borderColor: seat.status === "available" ? sectionColor : undefined,
-                }}
-                className={cn(
-                  "w-7 h-7 text-xs font-medium rounded-sm transition-all relative",
-                  seat.status === "available" && "bg-white border-2 text-gray-800 hover:opacity-80",
-                  seat.status === "selected" && "bg-[#EFBF04] border-2 border-[#EFBF04] text-gray-900 font-bold",
-                  seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed border-0"
-                )}
-              >
-                {seat.seat_number}
-              </button>
-            </TooltipTrigger>
-            {seat.status !== "occupied" && (
-              <TooltipContent 
-                className="bg-[#1A1D25] border-white/20 text-white"
-                side="top"
-              >
-                <div className="text-center">
-                  <p className="font-bold">{seat.row_label}{seat.seat_number}</p>
-                  <p className="text-xs text-white/70">
-                    {seat.section.section_name} - LKR {seat.section.price.toFixed(2)}
-                  </p>
-                </div>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
-      );
-      
-      lastPosition = seat.column_position;
-    });
+    return (
+      <TooltipProvider key={seat.seat_id}>
+        <Tooltip delayDuration={100}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => handleSeatClick(seat.seat_id)}
+              disabled={seat.status === "occupied"}
+              className={cn(
+                "w-12 h-14 md:w-14 md:h-16 text-xs font-bold rounded-md transition-all flex flex-col items-center justify-center gap-0.5",
+                seat.status === "available" && isVVIP && "bg-[#4A0E63] text-white hover:opacity-80",
+                seat.status === "available" && !isVVIP && "bg-[#EFBF04] text-gray-900 hover:opacity-80",
+                seat.status === "selected" && "bg-[#1e40af] text-white ring-2 ring-white",
+                seat.status === "occupied" && "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+              )}
+            >
+              <span className="text-[10px] md:text-xs font-bold">{seatLabel}</span>
+              <span className="text-[8px] md:text-[10px] opacity-80">
+                {seat.section.price.toLocaleString()}
+              </span>
+            </button>
+          </TooltipTrigger>
+          {seat.status !== "occupied" && (
+            <TooltipContent 
+              className="bg-[#1A1D25] border-white/20 text-white"
+              side="top"
+            >
+              <div className="text-center">
+                <p className="font-bold">{seatLabel}</p>
+                <p className="text-xs text-white/70">
+                  {seat.section.section_name} - LKR {seat.section.price.toLocaleString()}
+                </p>
+              </div>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
+  // Render seats with center aisle
+  const renderSeatsWithAisle = (rowSeats: SeatData[]) => {
+    const midPoint = Math.ceil(rowSeats.length / 2);
+    const leftSeats = rowSeats.slice(0, midPoint);
+    const rightSeats = rowSeats.slice(midPoint);
     
-    return elements;
+    return (
+      <div className="flex items-center justify-center gap-1 md:gap-1.5">
+        {/* Left section */}
+        <div className="flex gap-1 md:gap-1.5">
+          {leftSeats.map(seat => renderSeat(seat))}
+        </div>
+        
+        {/* Center aisle */}
+        <div className="w-6 md:w-10" />
+        
+        {/* Right section */}
+        <div className="flex gap-1 md:gap-1.5">
+          {rightSeats.map(seat => renderSeat(seat))}
+        </div>
+      </div>
+    );
   };
 
   const handleProceed = () => {
@@ -367,69 +384,67 @@ export default function SeatSelection() {
         </div>
         
         {/* Seat Map */}
-        <div className="flex-1 overflow-auto py-6">
-          <div className="container mx-auto px-4 max-w-4xl">
+        <div className="flex-1 overflow-auto py-6 pb-32 lg:pb-6">
+          <div className="container mx-auto px-4">
             {/* Screen */}
             <div className="text-center mb-8">
-              <div className="text-sm text-white/50 mb-2">SCREEN</div>
-              <div className="relative">
-                <svg viewBox="0 0 400 40" className="w-full max-w-xl mx-auto h-10">
-                  <path 
-                    d="M 20 35 Q 200 0 380 35" 
-                    fill="none" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </svg>
+              <div className="relative max-w-3xl mx-auto">
+                <div className="h-8 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent rounded-t-full" />
+                <div className="text-sm text-white/70 font-medium tracking-[0.3em] mt-2 bg-[#1A1D25] inline-block px-8 py-1 rounded">
+                  SCREEN
+                </div>
               </div>
+            </div>
+            
+            {/* Seat Grid - Rows L to A (top to bottom) */}
+            <div className="space-y-2 max-w-5xl mx-auto overflow-x-auto">
+              {rowOrder.map((rowLabel) => {
+                const { seats: rowSeats, section } = seatsByRow[rowLabel];
+                const isVVIP = section.section_name === "VVIP";
+                
+                return (
+                  <div key={rowLabel} className="flex items-center gap-3 md:gap-4 min-w-max justify-center">
+                    {/* Left Row Label */}
+                    <span className={cn(
+                      "w-8 text-center text-sm font-bold",
+                      isVVIP ? "text-[#4A0E63]" : "text-[#EFBF04]"
+                    )}>
+                      {rowLabel}
+                    </span>
+                    
+                    {/* Seats */}
+                    {renderSeatsWithAisle(rowSeats)}
+                    
+                    {/* Right Row Label */}
+                    <span className={cn(
+                      "w-8 text-center text-sm font-bold",
+                      isVVIP ? "text-[#4A0E63]" : "text-[#EFBF04]"
+                    )}>
+                      {rowLabel}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
             
             {/* Legend */}
-            <div className="flex items-center justify-center gap-6 mb-8 text-sm flex-wrap">
+            <div className="flex items-center justify-center gap-6 mt-8 text-sm flex-wrap">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 border-2 border-white/40 bg-white rounded-sm" />
-                <span className="text-white/70">Available</span>
+                <div className="w-8 h-8 bg-[#4A0E63] rounded-md" />
+                <span className="text-white/70">VVIP (3,200)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-[#EFBF04] rounded-sm" />
+                <div className="w-8 h-8 bg-[#EFBF04] rounded-md" />
+                <span className="text-white/70">VIP (2,400)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-[#1e40af] rounded-md" />
                 <span className="text-white/70">Selected</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-white/20 rounded-sm" />
+                <div className="w-8 h-8 bg-gray-600/50 rounded-md" />
                 <span className="text-white/70">Occupied</span>
               </div>
-            </div>
-            
-            {/* Seat Sections */}
-            <div className="space-y-8">
-              {Object.entries(seatsBySection).map(([sectionName, { section, rows }]) => (
-                <div key={sectionName}>
-                  {/* Section Header */}
-                  <div className="text-center mb-4">
-                    <span 
-                      className="font-bold text-lg px-4 py-1 rounded"
-                      style={{ color: section.color }}
-                    >
-                      {section.section_name}
-                    </span>
-                    <span className="text-white/50 ml-2">
-                      (LKR {section.price.toFixed(2)})
-                    </span>
-                  </div>
-                  
-                  {/* Rows */}
-                  {Object.entries(rows).map(([rowLabel, rowSeats]) => (
-                    <div key={rowLabel} className="flex items-center justify-center gap-2 mb-2">
-                      <span className="w-6 text-center text-sm font-medium text-white/50">{rowLabel}</span>
-                      <div className="flex gap-1 items-center">
-                        {renderSeatsWithAisles(rowSeats, section.color)}
-                      </div>
-                      <span className="w-6 text-center text-sm font-medium text-white/50">{rowLabel}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -469,7 +484,7 @@ export default function SeatSelection() {
                 className="text-sm font-medium mb-2"
                 style={{ color: section.color }}
               >
-                {section.section_name} - LKR {section.price.toFixed(2)}
+                {section.section_name} - LKR {section.price.toLocaleString()}
               </p>
               <div className="flex flex-wrap gap-2">
                 {sectionSeats.map(seat => (
@@ -490,7 +505,7 @@ export default function SeatSelection() {
               <h4 className="text-xs text-white/50 mb-2">TICKETS</h4>
               {Object.entries(selectedSeatsBySection).map(([sectionName, { section, seats: sectionSeats }]) => (
                 <div key={sectionName} className="flex justify-between text-sm mb-1">
-                  <span className="text-white/80">{sectionSeats.length} x {section.price.toFixed(2)}</span>
+                  <span className="text-white/80">{sectionSeats.length} x {section.price.toLocaleString()}</span>
                   <span className="text-white">LKR {(sectionSeats.length * section.price).toLocaleString()}</span>
                 </div>
               ))}

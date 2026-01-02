@@ -18,7 +18,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/movie-booking/:movieRef" element={<MovieBooking />} />
+          <Route path="/movie-booking" element={<MovieBooking />} />
           <Route path="/select-seats" element={<SeatSelection />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

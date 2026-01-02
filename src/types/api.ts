@@ -29,46 +29,6 @@ export interface ProductionCompany {
   origin_country?: string;
 }
 
-export interface Showtime {
-  id: number;
-  time: string;
-  format: string;
-  language: string;
-  available: boolean;
-  filling_fast?: boolean;
-  screen_name?: string;
-}
-
-export interface Theater {
-  id: number;
-  name: string;
-  address: string;
-  distance?: string;
-  showtimes: Showtime[];
-}
-
-export interface ApiMovieWithShowtimes {
-  id: number;
-  ref: string;
-  title: string;
-  tagline: string | null;
-  description: string | null;
-  runtime: number | null;
-  language: string;
-  rating: number | null;
-  release_date: string | null;
-  genres: string[];
-  poster_media: MediaFile | null;
-  backdrop_media: MediaFile | null;
-  gallery_medias: MediaFile[];
-  cast_details: CastMember[];
-  crew_details?: CrewMember[];
-  production_companies?: ProductionCompany[];
-  trailer_url: string | null;
-  type?: MovieType;
-  theaters?: Theater[];
-}
-
 export interface ApiMovie {
   id: number;
   title: string;
@@ -105,12 +65,6 @@ export interface MoviesApiResponse {
     per_page: number;
     total: number;
   };
-  message?: string;
-}
-
-export interface BookingMoviesApiResponse {
-  success: boolean;
-  data: ApiMovieWithShowtimes[];
   message?: string;
 }
 

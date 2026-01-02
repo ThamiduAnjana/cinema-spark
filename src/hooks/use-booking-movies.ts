@@ -14,21 +14,16 @@ export function useBookingMovies() {
 }
 
 export function useMovieByRef(movieRef: string) {
-  const { data: movies, isLoading, error, isError } = useBookingMovies();
+  const { data: movies, isLoading, error } = useBookingMovies();
   
   const movie = movies?.find(
     (m) => m.ref === movieRef || m.id === movieRef
   );
-  
-  // Determine if movie was not found (API succeeded but movie doesn't exist)
-  const notFound = !isLoading && !isError && movies && !movie;
   
   return {
     movie,
     allMovies: movies,
     isLoading,
     error,
-    isError,
-    notFound,
   };
 }

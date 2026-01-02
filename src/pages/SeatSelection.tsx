@@ -226,9 +226,9 @@ export default function SeatSelection() {
               disabled={seat.status === "occupied"}
               className={cn(
                 "w-12 h-14 md:w-14 md:h-16 text-xs font-bold rounded-md transition-all flex flex-col items-center justify-center gap-0.5",
-                seat.status === "available" && isVVIP && "bg-[#4A0E63] text-white hover:opacity-80",
-                seat.status === "available" && !isVVIP && "bg-[#EFBF04] text-gray-900 hover:opacity-80",
-                seat.status === "selected" && "bg-primary text-white ring-2 ring-white",
+                seat.status === "available" && isVVIP && "bg-primary text-white hover:opacity-80",
+                seat.status === "available" && !isVVIP && "bg-primary/70 text-white hover:opacity-80",
+                seat.status === "selected" && "bg-white text-primary ring-2 ring-primary",
                 seat.status === "occupied" && "bg-gray-600/50 text-gray-400 cursor-not-allowed"
               )}
             >
@@ -430,15 +430,15 @@ export default function SeatSelection() {
             {/* Legend */}
             <div className="flex items-center justify-center gap-6 mt-8 text-sm flex-wrap">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#4A0E63] rounded-md" />
+                <div className="w-8 h-8 bg-primary rounded-md" />
                 <span className="text-white/70">VVIP (3,200)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#EFBF04] rounded-md" />
+                <div className="w-8 h-8 bg-primary/70 rounded-md" />
                 <span className="text-white/70">VIP (2,400)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-md" />
+                <div className="w-8 h-8 bg-white rounded-md border-2 border-primary" />
                 <span className="text-white/70">Selected</span>
               </div>
               <div className="flex items-center gap-2">

@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Movie } from "@/data/movies";
 import { MovieDetailsModal } from "./MovieDetailsModal";
+import { TransformedMovie } from "@/services/movie-service";
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: TransformedMovie;
 }
 
 export function MovieCard({ movie }: MovieCardProps) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent modal from opening if clicking on Book Now button
@@ -29,10 +30,23 @@ export function MovieCard({ movie }: MovieCardProps) {
     <>
       <div className="group cursor-pointer" onClick={handleCardClick}>
         <div className="relative overflow-hidden rounded-lg mb-3 card-hover">
+          {/* Placeholder while image loads */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-muted animate-pulse" />
+          )}
           <img
             src={movie.poster}
             alt={movie.title}
-            className="w-full aspect-[2/3] object-cover"
+            className={`w-full aspect-[2/3] object-cover transition-opacity duration-300 ${
+              imageLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              // Fallback to placeholder on error
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+              setImageLoaded(true);
+            }}
           />
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -61,10 +75,10 @@ export function MovieCard({ movie }: MovieCardProps) {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{movie.language}</span>
             <span>•</span>
-            <span>{movie.duration}</span>
+            <span>{movie.runtime}</span>
           </div>
           <div className="flex flex-wrap gap-1">
-            {movie.genre.slice(0, 2).map((g) => (
+            {movie.genres.slice(0, 2).map((g) => (
               <Badge
                 key={g}
                 variant="secondary"

@@ -1,60 +1,20 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Star, Clock, Calendar, Globe } from "lucide-react";
-import { Movie } from "@/data/movies";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TransformedMovie } from "@/services/movie-service";
+import { TMDB_IMAGE_BASE } from "@/lib/api-config";
 
 interface MovieDetailsModalProps {
-  movie: Movie | null;
+  movie: TransformedMovie | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-// Extended movie data with cast, crew, and backdrops
-interface ExtendedMovie extends Movie {
-  cast?: { name: string; image: string; role?: string }[];
-  crew?: { name: string; image: string; role: string }[];
-  backdrops?: string[];
-}
-
-// Demo cast and crew data
-const demoCast = [
-  { name: "Tom Holland", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", role: "Lead Actor" },
-  { name: "Zendaya", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face", role: "Lead Actress" },
-  { name: "Jacob Batalon", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face", role: "Supporting" },
-  { name: "Marisa Tomei", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face", role: "Supporting" },
-  { name: "Benedict Wong", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face", role: "Guest" },
-  { name: "Jamie Foxx", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face", role: "Villain" },
-];
-
-const demoCrew = [
-  { name: "Jon Watts", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face", role: "Director" },
-  { name: "Kevin Feige", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face", role: "Producer" },
-  { name: "Amy Pascal", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=face", role: "Producer" },
-  { name: "Michael Giacchino", image: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=150&h=150&fit=crop&crop=face", role: "Music" },
-];
-
-const demoBackdrops = [
-  "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=225&fit=crop",
-  "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=225&fit=crop",
-  "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=225&fit=crop",
-  "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&h=225&fit=crop",
-  "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=225&fit=crop",
-  "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=225&fit=crop",
-];
-
 export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalProps) {
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDivElement>(null);
-
-  // Extend movie with demo data
-  const extendedMovie: ExtendedMovie | null = movie ? {
-    ...movie,
-    cast: demoCast,
-    crew: demoCrew,
-    backdrops: demoBackdrops,
-  } : null;
 
   // Handle ESC key and body scroll lock
   useEffect(() => {
@@ -78,7 +38,26 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
     if (e.target === e.currentTarget) onClose();
   };
 
-  if (!isOpen || !extendedMovie) return null;
+  if (!isOpen || !movie) return null;
+
+  // Helper to get profile image URL
+  const getProfileImage = (profilePath: string | null) => {
+    if (!profilePath) return "/placeholder.svg";
+    if (profilePath.startsWith("http")) return profilePath;
+    return `${TMDB_IMAGE_BASE}${profilePath}`;
+  };
+
+  // Filter crew by known departments
+  const getCrewByDepartment = () => {
+    if (!movie.crew || movie.crew.length === 0) return [];
+    
+    const departments = ["Directing", "Production", "Writing", "Sound", "Camera"];
+    return movie.crew.filter((member) =>
+      departments.some((dept) => member.department?.includes(dept))
+    );
+  };
+
+  const displayedCrew = getCrewByDepartment().slice(0, 4);
 
   return (
     <div
@@ -108,7 +87,7 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
             {/* Header with backdrop */}
             <div
               className="relative h-[280px] md:h-[320px] bg-cover bg-center"
-              style={{ backgroundImage: `url(${extendedMovie.backdrop})` }}
+              style={{ backgroundImage: `url(${movie.backdrop})` }}
             >
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#FFF3DC] via-[#FFF3DC]/30 to-transparent" />
@@ -120,39 +99,44 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                   {/* Poster */}
                   <div className="hidden md:block w-32 lg:w-40 flex-shrink-0">
                     <img
-                      src={extendedMovie.poster}
-                      alt={extendedMovie.title}
+                      src={movie.poster}
+                      alt={movie.title}
                       className="w-full aspect-[2/3] object-cover rounded-lg shadow-xl"
                     />
                   </div>
 
                   {/* Title and meta */}
                   <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg mb-3">
-                      {extendedMovie.title}
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg mb-1">
+                      {movie.title}
                     </h1>
+                    {movie.tagline && (
+                      <p className="text-white/70 text-sm italic mb-3">{movie.tagline}</p>
+                    )}
                     <div className="flex flex-wrap items-center gap-3 md:gap-4 text-white/90 text-sm">
-                      {extendedMovie.rating > 0 && (
+                      {movie.rating > 0 && (
                         <div className="flex items-center gap-1 bg-primary/90 px-2 py-1 rounded">
                           <Star className="w-4 h-4 fill-current" />
-                          <span className="font-semibold">{extendedMovie.rating}</span>
+                          <span className="font-semibold">{movie.rating}</span>
                         </div>
                       )}
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        <span>{extendedMovie.duration}</span>
+                        <span>{movie.runtime}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{extendedMovie.releaseDate}</span>
-                      </div>
+                      {movie.releaseDate && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{movie.releaseDate}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-1">
                         <Globe className="w-4 h-4" />
-                        <span>{extendedMovie.language}</span>
+                        <span>{movie.language}</span>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {extendedMovie.genre.map((g) => (
+                      {movie.genres.map((g) => (
                         <span
                           key={g}
                           className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium"
@@ -173,14 +157,14 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                 <div className="flex-1">
                   <h2 className="text-lg font-bold text-gray-900 mb-3">Synopsis</h2>
                   <p className="text-gray-700 leading-relaxed">
-                    {extendedMovie.description}
+                    {movie.description || "No synopsis available."}
                   </p>
                 </div>
                 <div className="md:w-48 flex-shrink-0">
                   <Button
                     onClick={() => {
                       onClose();
-                      navigate(`/movie-booking?movie=${extendedMovie.id}`);
+                      navigate(`/movie-booking?movie=${movie.id}`);
                     }}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
                   >
@@ -190,74 +174,117 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
               </section>
 
               {/* Cast */}
-              <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Cast</h2>
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300">
-                  {extendedMovie.cast?.map((actor, index) => (
-                    <div key={index} className="flex-shrink-0 text-center w-20">
-                      <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden ring-2 ring-primary/20">
-                        <img
-                          src={actor.image}
-                          alt={actor.name}
-                          className="w-full h-full object-cover"
-                        />
+              {movie.cast && movie.cast.length > 0 && (
+                <section>
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">Cast</h2>
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300">
+                    {movie.cast.map((actor) => (
+                      <div key={actor.id} className="flex-shrink-0 text-center w-20">
+                        <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden ring-2 ring-primary/20 bg-muted">
+                          <img
+                            src={getProfileImage(actor.profile_path)}
+                            alt={actor.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg";
+                            }}
+                          />
+                        </div>
+                        <p className="text-xs font-medium text-gray-900 line-clamp-2">
+                          {actor.name}
+                        </p>
+                        {actor.character && (
+                          <p className="text-xs text-gray-500 line-clamp-1">
+                            {actor.character}
+                          </p>
+                        )}
                       </div>
-                      <p className="text-xs font-medium text-gray-900 line-clamp-2">
-                        {actor.name}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Crew */}
-              <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Crew</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {extendedMovie.crew?.map((member, index) => (
-                    <div key={index} className="flex items-center gap-3 bg-white/60 p-3 rounded-lg">
-                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className="w-full h-full object-cover"
-                        />
+              {displayedCrew.length > 0 && (
+                <section>
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">Crew</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {displayedCrew.map((member) => (
+                      <div key={member.id} className="flex items-center gap-3 bg-white/60 p-3 rounded-lg">
+                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-muted">
+                          <img
+                            src={getProfileImage(member.profile_path)}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg";
+                            }}
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {member.name}
+                          </p>
+                          <p className="text-xs text-gray-500">{member.job}</p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {member.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{member.role}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-              {/* Backdrops */}
-              <section>
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Gallery</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {extendedMovie.backdrops?.map((backdrop, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-video rounded-lg overflow-hidden group cursor-pointer"
-                    >
+              {/* Backdrops / Gallery */}
+              {movie.galleryImages && movie.galleryImages.length > 0 && (
+                <section>
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">Gallery</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {movie.galleryImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-video rounded-lg overflow-hidden group cursor-pointer"
+                      >
+                        <img
+                          src={image}
+                          alt={`Scene ${index + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Show primary backdrop if no gallery */}
+              {(!movie.galleryImages || movie.galleryImages.length === 0) && movie.backdrop && (
+                <section>
+                  <h2 className="text-lg font-bold text-gray-900 mb-4">Gallery</h2>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="relative aspect-video rounded-lg overflow-hidden">
                       <img
-                        src={backdrop}
-                        alt={`Scene ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        src={movie.backdrop}
+                        alt="Movie backdrop"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                     </div>
-                  ))}
-                </div>
-              </section>
+                  </div>
+                </section>
+              )}
             </div>
 
             {/* Mobile sticky Book Now */}
             <div className="md:hidden sticky bottom-0 p-4 bg-[#FFF3DC] border-t border-gray-200">
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 rounded-lg">
+              <Button 
+                onClick={() => {
+                  onClose();
+                  navigate(`/movie-booking?movie=${movie.id}`);
+                }}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 rounded-lg"
+              >
                 Book Now
               </Button>
             </div>

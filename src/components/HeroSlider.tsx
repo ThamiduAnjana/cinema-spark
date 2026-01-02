@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Play, Clock, Calendar, Globe, Film, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +58,7 @@ const heroMovies: HeroMovie[] = [
 ];
 
 export function HeroSlider() {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -215,6 +217,7 @@ export function HeroSlider() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
               <Button
                 size="lg"
+                onClick={() => navigate(`/movie-booking?movie=${movie.id}`)}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 text-base md:text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
               >
                 Book Now

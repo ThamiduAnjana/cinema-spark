@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Movie } from "@/data/movies";
 import { MovieDetailsModal } from "./MovieDetailsModal";
@@ -8,6 +9,7 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie }: MovieCardProps) {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -16,6 +18,11 @@ export function MovieCard({ movie }: MovieCardProps) {
     if (target.closest('button')) return;
     
     setIsModalOpen(true);
+  };
+
+  const handleBookNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/movie-booking?movie=${movie.id}`);
   };
 
   return (
@@ -30,7 +37,10 @@ export function MovieCard({ movie }: MovieCardProps) {
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="absolute bottom-4 left-4 right-4">
-              <button className="w-full py-2 bg-primary text-primary-foreground rounded-md font-semibold text-sm hover:bg-primary/90 transition-colors">
+              <button 
+                onClick={handleBookNow}
+                className="w-full py-2 bg-primary text-primary-foreground rounded-md font-semibold text-sm hover:bg-primary/90 transition-colors"
+              >
                 Book Now
               </button>
             </div>

@@ -1,4 +1,5 @@
-import { Film, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import sasPlazaLogo from "@/assets/sas-plaza-logo.jpg";
 
 export function Footer() {
   const footerLinks = {
@@ -27,11 +28,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <a href="/" className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
-                <Film className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-display font-bold">CinePlex</span>
+            <a href="/" className="flex items-center mb-4">
+              <img 
+                src={sasPlazaLogo} 
+                alt="SAS Plaza - Trincomalee, Sri Lanka" 
+                className="h-14 w-auto object-contain"
+              />
             </a>
             <p className="text-white/60 mb-6 max-w-sm">
               Your premier destination for the best cinema experience. Book tickets,
@@ -148,7 +150,7 @@ export function Footer() {
               </a>
             </div>
             <p className="text-white/40 text-sm">
-              © 2024 CinePlex. All rights reserved.
+              © 2025 SAS Plaza Cinema, Trincomalee. All rights reserved.
             </p>
           </div>
         </div>

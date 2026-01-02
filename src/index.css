@@ -4,6 +4,51 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
 
+/* Hero Slider Animations */
+@keyframes hero-text-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-poster-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(50px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-hero-text-enter {
+  animation: hero-text-enter 0.7s ease-out forwards;
+}
+
+.animate-hero-poster-enter {
+  animation: hero-poster-enter 0.7s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-progress {
+  animation: progress 5s linear forwards;
+}
+
 @layer base {
   :root {
     --background: 0 0% 98%;

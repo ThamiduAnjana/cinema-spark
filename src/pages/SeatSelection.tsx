@@ -5,14 +5,101 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { nowShowingMovies, featuredMovie } from "@/data/movies";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-// Seat configuration
-interface Seat {
-  id: string;
-  row: string;
-  number: number;
+// JSON API Response structure
+interface Section {
+  section_id: number;
+  section_name: string;
+  price: number;
+  color: string;
+}
+
+interface SeatData {
+  seat_id: number;
+  row_label: string;
+  seat_number: number;
+  column_position: number;
   status: "available" | "occupied" | "selected";
-  section: "classic" | "prime" | "superior";
+  section: Section;
+}
+
+interface LayoutData {
+  total_rows: number;
+  total_seats: number;
+}
+
+interface SeatLayoutResponse {
+  layout: LayoutData;
+  seats: SeatData[];
+}
+
+// Mock JSON API Response - VVIP and VIP sections
+const seatLayoutApiResponse: SeatLayoutResponse = {
+  layout: {
+    total_rows: 7,
+    total_seats: 91,
+  },
+  seats: generateMockSeats(),
+};
+
+function generateMockSeats(): SeatData[] {
+  const seats: SeatData[] = [];
+  const sections: Record<string, Section> = {
+    VVIP: { section_id: 1, section_name: "VVIP", price: 3200.00, color: "#4A0E63" },
+    VIP: { section_id: 2, section_name: "VIP", price: 2500.00, color: "#EFBF04" },
+  };
+  
+  // VVIP rows (A, B)
+  const vvipRows = ["A", "B"];
+  // VIP rows (C, D, E, F, G)
+  const vipRows = ["C", "D", "E", "F", "G"];
+  
+  // Occupied seats set
+  const occupiedSeats = new Set([
+    "A5", "A6", "B3", "B9", "C2", "C10", "C11",
+    "D5", "D6", "E8", "E9", "F3", "F4", "F11",
+    "G1", "G7", "G12", "G13"
+  ]);
+  
+  let seatId = 1;
+  
+  // Generate VVIP seats
+  vvipRows.forEach((row) => {
+    for (let i = 1; i <= 13; i++) {
+      const seatKey = `${row}${i}`;
+      seats.push({
+        seat_id: seatId++,
+        row_label: row,
+        seat_number: i,
+        column_position: i <= 4 ? i : (i <= 9 ? i + 1 : i + 2), // Add gaps for aisles
+        status: occupiedSeats.has(seatKey) ? "occupied" : "available",
+        section: sections.VVIP,
+      });
+    }
+  });
+  
+  // Generate VIP seats
+  vipRows.forEach((row) => {
+    for (let i = 1; i <= 13; i++) {
+      const seatKey = `${row}${i}`;
+      seats.push({
+        seat_id: seatId++,
+        row_label: row,
+        seat_number: i,
+        column_position: i <= 4 ? i : (i <= 9 ? i + 1 : i + 2), // Add gaps for aisles
+        status: occupiedSeats.has(seatKey) ? "occupied" : "available",
+        section: sections.VIP,
+      });
+    }
+  });
+  
+  return seats;
 }
 
 // Cinema showtimes data
@@ -28,47 +115,6 @@ const showtimeData = [
   { time: "10:35 PM", language: "English", format: "3D" },
   { time: "10:45 PM", language: "Tamil", format: "LUXE" },
 ];
-
-// Seat prices per section
-const sectionPrices: Record<string, number> = {
-  classic: 1500,
-  prime: 1500,
-  superior: 1500,
-};
-
-// Generate initial seat map
-const generateSeatMap = (): Seat[] => {
-  const seats: Seat[] = [];
-  const rows = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L"];
-  const seatsPerRow = 13;
-  
-  // Randomly mark some seats as occupied
-  const occupiedSeats = new Set([
-    "A11", "B11", "B9", "C11", "C4", "C1",
-    "D11", "D9", "E9", "F11", "G11", "H11", "H9", "H3", "H2",
-    "J11", "J9", "K11", "K9"
-  ]);
-
-  rows.forEach((row, rowIndex) => {
-    let section: "classic" | "prime" | "superior";
-    if (rowIndex < 3) section = "classic";
-    else if (rowIndex < 8) section = "prime";
-    else section = "superior";
-
-    for (let i = 1; i <= seatsPerRow; i++) {
-      const seatId = `${row}${i}`;
-      seats.push({
-        id: seatId,
-        row,
-        number: i,
-        status: occupiedSeats.has(seatId) ? "occupied" : "available",
-        section,
-      });
-    }
-  });
-
-  return seats;
-};
 
 // Generate dates
 const generateDates = () => {
@@ -103,7 +149,7 @@ export default function SeatSelection() {
   const initialTime = searchParams.get('time') || '07:00 PM';
   const format = searchParams.get('format') || '3D';
   
-  const [seats, setSeats] = useState<Seat[]>(generateSeatMap);
+  const [seats, setSeats] = useState<SeatData[]>(seatLayoutApiResponse.seats);
   const [selectedTime, setSelectedTime] = useState(initialTime);
   const [dates] = useState(generateDates);
   const [selectedDateIndex] = useState(0);
@@ -119,14 +165,14 @@ export default function SeatSelection() {
   
   // Calculate totals
   const ticketTotal = useMemo(() => 
-    selectedSeats.reduce((sum, seat) => sum + sectionPrices[seat.section], 0),
+    selectedSeats.reduce((sum, seat) => sum + seat.section.price, 0),
     [selectedSeats]
   );
   
   // Handle seat click
-  const handleSeatClick = (seatId: string) => {
+  const handleSeatClick = (seatId: number) => {
     setSeats(prev => prev.map(seat => {
-      if (seat.id === seatId && seat.status !== "occupied") {
+      if (seat.seat_id === seatId && seat.status !== "occupied") {
         return {
           ...seat,
           status: seat.status === "selected" ? "available" : "selected"
@@ -138,30 +184,105 @@ export default function SeatSelection() {
   
   // Group seats by section and row
   const seatsBySection = useMemo(() => {
-    const grouped: Record<string, Record<string, Seat[]>> = {
-      classic: {},
-      prime: {},
-      superior: {},
-    };
+    const grouped: Record<string, { section: Section; rows: Record<string, SeatData[]> }> = {};
     
     seats.forEach(seat => {
-      if (!grouped[seat.section][seat.row]) {
-        grouped[seat.section][seat.row] = [];
+      const sectionName = seat.section.section_name;
+      if (!grouped[sectionName]) {
+        grouped[sectionName] = { section: seat.section, rows: {} };
       }
-      grouped[seat.section][seat.row].push(seat);
+      if (!grouped[sectionName].rows[seat.row_label]) {
+        grouped[sectionName].rows[seat.row_label] = [];
+      }
+      grouped[sectionName].rows[seat.row_label].push(seat);
+    });
+    
+    // Sort seats within each row by column_position
+    Object.values(grouped).forEach(({ rows }) => {
+      Object.values(rows).forEach(rowSeats => {
+        rowSeats.sort((a, b) => a.column_position - b.column_position);
+      });
     });
     
     return grouped;
   }, [seats]);
+
+  // Render seats with aisle gaps
+  const renderSeatsWithAisles = (rowSeats: SeatData[], sectionColor: string) => {
+    const elements: JSX.Element[] = [];
+    let lastPosition = 0;
+    
+    rowSeats.forEach((seat, index) => {
+      // Add aisle gap if there's a position jump
+      if (index > 0 && seat.column_position - lastPosition > 1) {
+        elements.push(
+          <div key={`aisle-${seat.seat_id}`} className="w-4" />
+        );
+      }
+      
+      elements.push(
+        <TooltipProvider key={seat.seat_id}>
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => handleSeatClick(seat.seat_id)}
+                disabled={seat.status === "occupied"}
+                style={{
+                  borderColor: seat.status === "available" ? sectionColor : undefined,
+                }}
+                className={cn(
+                  "w-7 h-7 text-xs font-medium rounded-sm transition-all relative",
+                  seat.status === "available" && "bg-white border-2 text-gray-800 hover:opacity-80",
+                  seat.status === "selected" && "bg-[#EFBF04] border-2 border-[#EFBF04] text-gray-900 font-bold",
+                  seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed border-0"
+                )}
+              >
+                {seat.seat_number}
+              </button>
+            </TooltipTrigger>
+            {seat.status !== "occupied" && (
+              <TooltipContent 
+                className="bg-[#1A1D25] border-white/20 text-white"
+                side="top"
+              >
+                <div className="text-center">
+                  <p className="font-bold">{seat.row_label}{seat.seat_number}</p>
+                  <p className="text-xs text-white/70">
+                    {seat.section.section_name} - LKR {seat.section.price.toFixed(2)}
+                  </p>
+                </div>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      );
+      
+      lastPosition = seat.column_position;
+    });
+    
+    return elements;
+  };
 
   const handleProceed = () => {
     if (selectedSeats.length === 0) {
       alert("Please select at least one seat");
       return;
     }
-    // Navigate to payment (placeholder)
-    alert(`Proceeding to payment for ${selectedSeats.length} seats: ${selectedSeats.map(s => s.id).join(", ")}\nTotal: LKR ${ticketTotal.toLocaleString()}`);
+    alert(`Proceeding to payment for ${selectedSeats.length} seats: ${selectedSeats.map(s => `${s.row_label}${s.seat_number}`).join(", ")}\nTotal: LKR ${ticketTotal.toLocaleString()}`);
   };
+
+  // Group selected seats by section for display
+  const selectedSeatsBySection = useMemo(() => {
+    const grouped: Record<string, { section: Section; seats: SeatData[] }> = {};
+    selectedSeats.forEach(seat => {
+      const sectionName = seat.section.section_name;
+      if (!grouped[sectionName]) {
+        grouped[sectionName] = { section: seat.section, seats: [] };
+      }
+      grouped[sectionName].seats.push(seat);
+    });
+    return grouped;
+  }, [selectedSeats]);
 
   return (
     <div className="min-h-screen bg-[#0B0D14] flex">
@@ -265,13 +386,13 @@ export default function SeatSelection() {
             </div>
             
             {/* Legend */}
-            <div className="flex items-center justify-center gap-6 mb-8 text-sm">
+            <div className="flex items-center justify-center gap-6 mb-8 text-sm flex-wrap">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 border-2 border-white/40 bg-transparent rounded-sm" />
+                <div className="w-6 h-6 border-2 border-white/40 bg-white rounded-sm" />
                 <span className="text-white/70">Available</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-primary rounded-sm" />
+                <div className="w-6 h-6 bg-[#EFBF04] rounded-sm" />
                 <span className="text-white/70">Selected</span>
               </div>
               <div className="flex items-center gap-2">
@@ -282,98 +403,33 @@ export default function SeatSelection() {
             
             {/* Seat Sections */}
             <div className="space-y-8">
-              {/* Classic Section */}
-              <div>
-                <div className="text-center mb-4">
-                  <span className="font-bold text-white">CLASSIC FULL</span>
-                  <span className="text-white/50 ml-2">(LKR {sectionPrices.classic.toFixed(2)})</span>
-                </div>
-                {Object.entries(seatsBySection.classic).map(([row, rowSeats]) => (
-                  <div key={row} className="flex items-center justify-center gap-2 mb-2">
-                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
-                    <div className="flex gap-1">
-                      {rowSeats.sort((a, b) => b.number - a.number).map(seat => (
-                        <button
-                          key={seat.id}
-                          onClick={() => handleSeatClick(seat.id)}
-                          disabled={seat.status === "occupied"}
-                          className={cn(
-                            "w-7 h-7 text-xs font-medium rounded-sm transition-all",
-                            seat.status === "available" && "bg-transparent border-2 border-white/40 hover:border-primary text-white/70",
-                            seat.status === "selected" && "bg-primary border-2 border-primary text-white",
-                            seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed"
-                          )}
-                        >
-                          {seat.number}
-                        </button>
-                      ))}
-                    </div>
-                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
+              {Object.entries(seatsBySection).map(([sectionName, { section, rows }]) => (
+                <div key={sectionName}>
+                  {/* Section Header */}
+                  <div className="text-center mb-4">
+                    <span 
+                      className="font-bold text-lg px-4 py-1 rounded"
+                      style={{ color: section.color }}
+                    >
+                      {section.section_name}
+                    </span>
+                    <span className="text-white/50 ml-2">
+                      (LKR {section.price.toFixed(2)})
+                    </span>
                   </div>
-                ))}
-              </div>
-              
-              {/* Prime Section */}
-              <div>
-                <div className="text-center mb-4">
-                  <span className="font-bold text-white">PRIME FULL</span>
-                  <span className="text-white/50 ml-2">(LKR {sectionPrices.prime.toFixed(2)})</span>
-                </div>
-                {Object.entries(seatsBySection.prime).map(([row, rowSeats]) => (
-                  <div key={row} className="flex items-center justify-center gap-2 mb-2">
-                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
-                    <div className="flex gap-1">
-                      {rowSeats.sort((a, b) => b.number - a.number).map(seat => (
-                        <button
-                          key={seat.id}
-                          onClick={() => handleSeatClick(seat.id)}
-                          disabled={seat.status === "occupied"}
-                          className={cn(
-                            "w-7 h-7 text-xs font-medium rounded-sm transition-all",
-                            seat.status === "available" && "bg-transparent border-2 border-white/40 hover:border-primary text-white/70",
-                            seat.status === "selected" && "bg-primary border-2 border-primary text-white",
-                            seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed"
-                          )}
-                        >
-                          {seat.number}
-                        </button>
-                      ))}
+                  
+                  {/* Rows */}
+                  {Object.entries(rows).map(([rowLabel, rowSeats]) => (
+                    <div key={rowLabel} className="flex items-center justify-center gap-2 mb-2">
+                      <span className="w-6 text-center text-sm font-medium text-white/50">{rowLabel}</span>
+                      <div className="flex gap-1 items-center">
+                        {renderSeatsWithAisles(rowSeats, section.color)}
+                      </div>
+                      <span className="w-6 text-center text-sm font-medium text-white/50">{rowLabel}</span>
                     </div>
-                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Superior Section */}
-              <div>
-                <div className="text-center mb-4">
-                  <span className="font-bold text-white">SUPERIOR FULL</span>
-                  <span className="text-white/50 ml-2">(LKR {sectionPrices.superior.toFixed(2)})</span>
+                  ))}
                 </div>
-                {Object.entries(seatsBySection.superior).map(([row, rowSeats]) => (
-                  <div key={row} className="flex items-center justify-center gap-2 mb-2">
-                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
-                    <div className="flex gap-1">
-                      {rowSeats.sort((a, b) => b.number - a.number).map(seat => (
-                        <button
-                          key={seat.id}
-                          onClick={() => handleSeatClick(seat.id)}
-                          disabled={seat.status === "occupied"}
-                          className={cn(
-                            "w-7 h-7 text-xs font-medium rounded-sm transition-all",
-                            seat.status === "available" && "bg-transparent border-2 border-white/40 hover:border-primary text-white/70",
-                            seat.status === "selected" && "bg-primary border-2 border-primary text-white",
-                            seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed"
-                          )}
-                        >
-                          {seat.number}
-                        </button>
-                      ))}
-                    </div>
-                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -405,34 +461,39 @@ export default function SeatSelection() {
             </div>
           </div>
           
-          {/* Seat Info */}
-          {selectedSeats.length > 0 && (
-            <div className="mb-6">
+          {/* Seat Info by Section */}
+          {Object.entries(selectedSeatsBySection).map(([sectionName, { section, seats: sectionSeats }]) => (
+            <div key={sectionName} className="mb-6">
               <h4 className="text-xs text-white/50 mb-2">SEAT INFO</h4>
-              <p className="text-sm font-medium text-primary mb-2">
-                {selectedSeats[0]?.section.toUpperCase()} FULL
+              <p 
+                className="text-sm font-medium mb-2"
+                style={{ color: section.color }}
+              >
+                {section.section_name} - LKR {section.price.toFixed(2)}
               </p>
               <div className="flex flex-wrap gap-2">
-                {selectedSeats.map(seat => (
+                {sectionSeats.map(seat => (
                   <span 
-                    key={seat.id}
+                    key={seat.seat_id}
                     className="px-3 py-1 bg-white/10 border border-white/20 rounded text-sm font-medium"
                   >
-                    {seat.id}
+                    {seat.row_label}{seat.seat_number}
                   </span>
                 ))}
               </div>
             </div>
-          )}
+          ))}
           
           {/* Tickets */}
           {selectedSeats.length > 0 && (
             <div className="mb-6">
               <h4 className="text-xs text-white/50 mb-2">TICKETS</h4>
-              <div className="flex justify-between text-sm">
-                <span className="text-white/80">{selectedSeats.length} x {sectionPrices[selectedSeats[0]?.section || 'classic']}</span>
-                <span className="text-white">LKR {ticketTotal.toLocaleString()}.00</span>
-              </div>
+              {Object.entries(selectedSeatsBySection).map(([sectionName, { section, seats: sectionSeats }]) => (
+                <div key={sectionName} className="flex justify-between text-sm mb-1">
+                  <span className="text-white/80">{sectionSeats.length} x {section.price.toFixed(2)}</span>
+                  <span className="text-white">LKR {(sectionSeats.length * section.price).toLocaleString()}</span>
+                </div>
+              ))}
             </div>
           )}
           
@@ -442,7 +503,7 @@ export default function SeatSelection() {
               <h4 className="text-xs text-white/50 mb-2">PAYMENT DETAILS</h4>
               <div className="flex justify-between text-sm">
                 <span className="text-white/80">Sub Total</span>
-                <span className="text-white">LKR {ticketTotal.toLocaleString()}.00</span>
+                <span className="text-white">LKR {ticketTotal.toLocaleString()}</span>
               </div>
             </div>
           )}
@@ -452,7 +513,7 @@ export default function SeatSelection() {
         <div className="p-4 border-t border-white/10">
           <div className="flex justify-between mb-4">
             <span className="font-bold text-white">Grand Total</span>
-            <span className="font-bold text-primary">LKR {ticketTotal.toLocaleString()}.00</span>
+            <span className="font-bold text-primary">LKR {ticketTotal.toLocaleString()}</span>
           </div>
           <Button 
             onClick={handleProceed}
@@ -471,7 +532,7 @@ export default function SeatSelection() {
             <p className="text-sm text-white/50">
               {selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected
             </p>
-            <p className="font-bold text-primary">LKR {ticketTotal.toLocaleString()}.00</p>
+            <p className="font-bold text-primary">LKR {ticketTotal.toLocaleString()}</p>
           </div>
           <Button 
             onClick={handleProceed}

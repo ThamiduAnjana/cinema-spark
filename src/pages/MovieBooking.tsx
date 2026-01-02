@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft } from "lucide-react";
+import { ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { nowShowingMovies, featuredMovie } from "@/data/movies";
-import sasPlazaLogo from "@/assets/sas-plaza-logo.jpg";
+import { Footer } from "@/components/Footer";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 // Cinema data with showtimes
 const cinemaData = [
@@ -97,38 +98,19 @@ export default function MovieBooking() {
     <div className="min-h-screen bg-[#0B0D14]">
       {/* Header */}
       <header className="bg-[#0B0D14] border-b border-white/10 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-end">
           <div className="flex items-center gap-4">
-            <img 
-              src={sasPlazaLogo} 
-              alt="SAS Plaza" 
-              className="h-10 w-auto cursor-pointer"
-              onClick={() => navigate('/')}
-            />
-            <button 
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Home
-            </button>
-          </div>
-          
-          {/* Breadcrumb */}
-          <nav className="hidden md:flex items-center gap-2 text-sm">
-            <span className="text-amber-500 font-medium">CHOOSE CINEMA</span>
-            <ChevronRight className="w-4 h-4 text-white/40" />
-            <span className="text-white/40">SELECT SEATS</span>
-            <ChevronRight className="w-4 h-4 text-white/40" />
-            <span className="text-white/40">PAYMENT</span>
-          </nav>
-          
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white/80">
               <MapPin className="w-4 h-4" />
               <span>Trincomalee</span>
             </div>
-            <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+            <ThemeToggle />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-primary text-primary hover:bg-primary/10 gap-2"
+            >
+              <User className="w-4 h-4" />
               Login
             </Button>
           </div>
@@ -349,51 +331,7 @@ export default function MovieBooking() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0B0D14] border-t border-white/10 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Security Badges */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-xs text-white/40">
-                <span className="px-2 py-1 border border-white/20 rounded">PCI DSS CERTIFIED</span>
-                <span className="px-2 py-1 border border-white/20 rounded">Norton SECURED</span>
-              </div>
-            </div>
-            
-            {/* Social Links */}
-            <div className="flex items-center gap-4">
-              <a href="#" className="text-white/40 hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
-              </a>
-              <a href="#" className="text-white/40 hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
-              </a>
-            </div>
-            
-            {/* App Store Badges */}
-            <div className="flex items-center gap-3">
-              <a href="#" className="block">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" className="h-10" />
-              </a>
-              <a href="#" className="block">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-10" />
-              </a>
-            </div>
-          </div>
-          
-          <div className="mt-6 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-white/40">© 2026 All rights reserved</p>
-            <div className="flex flex-wrap items-center gap-4 text-xs text-white/40">
-              <a href="#" className="hover:text-white transition-colors">About Us</a>
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms & Conditions</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Use</a>
-              <a href="#" className="hover:text-white transition-colors">Feedback</a>
-              <a href="#" className="hover:text-white transition-colors">FAQ</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

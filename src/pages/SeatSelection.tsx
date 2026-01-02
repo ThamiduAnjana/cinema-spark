@@ -51,8 +51,8 @@ const seatLayoutApiResponse: SeatLayoutResponse = {
 function generateMockSeats(): SeatData[] {
   const seats: SeatData[] = [];
   const sections: Record<string, Section> = {
-    VVIP: { section_id: 1, section_name: "VVIP", price: 3200.00, color: "#4A0E63" },
-    VIP: { section_id: 2, section_name: "VIP", price: 2400.00, color: "#EFBF04" },
+    VVIP: { section_id: 1, section_name: "VVIP", price: 3200.00, color: "#E10600" },
+    VIP: { section_id: 2, section_name: "VIP", price: 2400.00, color: "#B00500" },
   };
   
   // VVIP rows (A, B) - bottom rows closest to screen

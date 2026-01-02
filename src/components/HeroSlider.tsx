@@ -87,31 +87,76 @@ export function HeroSlider() {
 
   return (
     <section 
-      className="relative h-[75vh] min-h-[550px] max-h-[850px] w-full overflow-hidden bg-hero"
+      className="relative h-[75vh] min-h-[550px] max-h-[850px] w-full overflow-hidden"
+      style={{ backgroundColor: '#0B0D14' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Background Slides */}
+      {/* Background Slides with Inline Background Images */}
       {heroMovies.map((m, index) => (
         <div
           key={m.id}
+          data-backdrop={m.backdrop}
           className={cn(
-            "absolute inset-0 transition-all duration-700 ease-out",
+            "hero-slide absolute inset-0 transition-all duration-700 ease-out",
             index === currentSlide 
               ? "opacity-100 scale-100" 
               : "opacity-0 scale-105"
           )}
+          style={{
+            backgroundImage: `url(${m.backdrop})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)',
+            transition: 'transform 8000ms ease-out, opacity 700ms ease-out'
+          }}
         >
+          {/* Primary Dark Gradient Overlay - Left to Right */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transform transition-transform duration-[8000ms] ease-out"
-            style={{ 
-              backgroundImage: `url(${m.backdrop})`,
-              transform: index === currentSlide ? 'scale(1.05)' : 'scale(1)'
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, rgba(11,13,20,0.95) 0%, rgba(11,13,20,0.75) 40%, rgba(11,13,20,0.45) 70%, rgba(11,13,20,0.25) 100%)'
             }}
           />
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+          
+          {/* Secondary Top-Bottom Gradient */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(180deg, rgba(11,13,20,0.5) 0%, transparent 30%, transparent 70%, rgba(11,13,20,0.9) 100%)'
+            }}
+          />
+          
+          {/* Patchy Color Overlay - Warm Tones */}
+          <div 
+            className="absolute inset-0 pointer-events-none mix-blend-overlay"
+            style={{
+              background: `
+                radial-gradient(ellipse 80% 60% at 85% 20%, rgba(255,120,40,0.25) 0%, transparent 55%),
+                radial-gradient(ellipse 70% 50% at 90% 80%, rgba(220,80,50,0.2) 0%, transparent 50%)
+              `
+            }}
+          />
+          
+          {/* Patchy Color Overlay - Cool Tones */}
+          <div 
+            className="absolute inset-0 pointer-events-none mix-blend-multiply"
+            style={{
+              background: `
+                radial-gradient(ellipse 60% 80% at 10% 90%, rgba(40,80,180,0.2) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 50% at 5% 30%, rgba(60,40,120,0.15) 0%, transparent 50%)
+              `
+            }}
+          />
+          
+          {/* Vignette Effect */}
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, rgba(11,13,20,0.7) 100%)'
+            }}
+          />
         </div>
       ))}
 

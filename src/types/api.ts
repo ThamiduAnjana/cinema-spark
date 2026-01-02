@@ -49,7 +49,7 @@ export interface Theater {
 
 export interface ApiMovieWithShowtimes {
   id: number;
-  ref: string;
+  movie_ref: string;
   title: string;
   tagline: string | null;
   description: string | null;
@@ -71,6 +71,7 @@ export interface ApiMovieWithShowtimes {
 
 export interface ApiMovie {
   id: number;
+  movie_ref: string;
   title: string;
   tagline: string | null;
   description: string | null;

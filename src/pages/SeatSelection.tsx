@@ -389,8 +389,8 @@ export default function SeatSelection() {
             {/* Screen */}
             <div className="text-center mb-8">
               <div className="relative max-w-3xl mx-auto">
-                <div className="h-8 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent rounded-t-full" />
-                <div className="text-sm text-white/70 font-medium tracking-[0.3em] mt-2 bg-[#1A1D25] inline-block px-8 py-1 rounded">
+                <div className="h-8 bg-gradient-to-r from-transparent via-primary/60 to-transparent rounded-t-full" />
+                <div className="text-sm text-primary font-medium tracking-[0.3em] mt-2 bg-[#1A1D25] inline-block px-8 py-1 rounded">
                   SCREEN
                 </div>
               </div>
@@ -405,10 +405,7 @@ export default function SeatSelection() {
                 return (
                   <div key={rowLabel} className="flex items-center gap-3 md:gap-4 min-w-max justify-center">
                     {/* Left Row Label */}
-                    <span className={cn(
-                      "w-8 text-center text-sm font-bold",
-                      isVVIP ? "text-[#4A0E63]" : "text-[#EFBF04]"
-                    )}>
+                    <span className="w-8 text-center text-sm font-bold text-primary">
                       {rowLabel}
                     </span>
                     
@@ -416,10 +413,7 @@ export default function SeatSelection() {
                     {renderSeatsWithAisle(rowSeats)}
                     
                     {/* Right Row Label */}
-                    <span className={cn(
-                      "w-8 text-center text-sm font-bold",
-                      isVVIP ? "text-[#4A0E63]" : "text-[#EFBF04]"
-                    )}>
+                    <span className="w-8 text-center text-sm font-bold text-primary">
                       {rowLabel}
                     </span>
                   </div>

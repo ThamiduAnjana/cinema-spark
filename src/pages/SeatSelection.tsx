@@ -164,17 +164,17 @@ export default function SeatSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-[#0B0D14] flex">
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-amber-400 border-b border-amber-500 sticky top-0 z-50">
+        <header className="bg-[#0B0D14] border-b border-white/10 sticky top-0 z-50">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             {/* Left: Back + Breadcrumb */}
             <div className="flex items-center gap-6">
               <button 
                 onClick={() => navigate(`/movie-booking?movie=${movieId}`)}
-                className="flex items-center gap-2 text-gray-800 hover:text-black transition-colors"
+                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span className="text-sm font-medium">BACK</span>
@@ -182,25 +182,25 @@ export default function SeatSelection() {
               
               {/* Breadcrumb */}
               <nav className="hidden md:flex items-center gap-3 text-sm">
-                <span className="text-gray-800 font-bold border-b-2 border-gray-800 pb-1">SELECT SEATS</span>
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-                <span className="text-gray-600">CHOOSE CINEMA</span>
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-                <span className="text-gray-600">PAYMENT</span>
+                <span className="text-white/40">CHOOSE CINEMA</span>
+                <ChevronRight className="w-4 h-4 text-white/40" />
+                <span className="text-primary font-medium border-b-2 border-primary pb-1">SELECT SEATS</span>
+                <ChevronRight className="w-4 h-4 text-white/40" />
+                <span className="text-white/40">PAYMENT</span>
               </nav>
             </div>
             
             {/* Right: Location, Theme, Login */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-gray-800">
+              <div className="flex items-center gap-2 text-white/80">
                 <MapPin className="w-4 h-4" />
-                <span>Colombo</span>
+                <span>Trincomalee</span>
               </div>
               <ThemeToggle />
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-gray-800 text-gray-800 hover:bg-gray-800/10 gap-2"
+                className="border-primary text-primary hover:bg-primary/10 gap-2"
               >
                 <User className="w-4 h-4" />
                 Login
@@ -210,10 +210,10 @@ export default function SeatSelection() {
         </header>
         
         {/* Time Selector */}
-        <div className="bg-white border-b border-gray-200 py-3">
+        <div className="bg-[#1A1D25] border-b border-white/10 py-3">
           <div className="container mx-auto px-4">
             <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide">
-              <div className="flex items-center gap-2 text-gray-700 shrink-0">
+              <div className="flex items-center gap-2 text-white shrink-0">
                 <span className="font-medium">{dates[selectedDateIndex].fullDate}</span>
                 <ChevronLeft className="w-4 h-4" />
               </div>
@@ -226,18 +226,18 @@ export default function SeatSelection() {
                     className={cn(
                       "flex flex-col items-center px-3 py-1 min-w-[80px] transition-all border-b-2",
                       selectedTime === showtime.time 
-                        ? "border-amber-500" 
-                        : "border-transparent hover:border-gray-300"
+                        ? "border-primary" 
+                        : "border-transparent hover:border-white/30"
                     )}
                   >
-                    <span className="text-[10px] text-gray-500">{showtime.language}</span>
+                    <span className="text-[10px] text-white/50">{showtime.language}</span>
                     <span className={cn(
                       "text-sm",
-                      selectedTime === showtime.time ? "font-bold text-gray-900" : "text-gray-600"
+                      selectedTime === showtime.time ? "font-bold text-white" : "text-white/70"
                     )}>
                       {showtime.time}
                     </span>
-                    <span className="text-[10px] text-gray-400">{showtime.format}</span>
+                    <span className="text-[10px] text-white/40">{showtime.format}</span>
                   </button>
                 ))}
               </div>
@@ -250,13 +250,13 @@ export default function SeatSelection() {
           <div className="container mx-auto px-4 max-w-4xl">
             {/* Screen */}
             <div className="text-center mb-8">
-              <div className="text-sm text-gray-500 mb-2">SCREEN</div>
+              <div className="text-sm text-white/50 mb-2">SCREEN</div>
               <div className="relative">
                 <svg viewBox="0 0 400 40" className="w-full max-w-xl mx-auto h-10">
                   <path 
                     d="M 20 35 Q 200 0 380 35" 
                     fill="none" 
-                    stroke="#1a1a2e" 
+                    stroke="hsl(var(--primary))" 
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
@@ -267,16 +267,16 @@ export default function SeatSelection() {
             {/* Legend */}
             <div className="flex items-center justify-center gap-6 mb-8 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 border-2 border-gray-400 bg-white rounded-sm" />
-                <span className="text-gray-600">Available</span>
+                <div className="w-6 h-6 border-2 border-white/40 bg-transparent rounded-sm" />
+                <span className="text-white/70">Available</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-amber-400 rounded-sm" />
-                <span className="text-gray-600">Selected</span>
+                <div className="w-6 h-6 bg-primary rounded-sm" />
+                <span className="text-white/70">Selected</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-gray-300 rounded-sm" />
-                <span className="text-gray-600">Occupied</span>
+                <div className="w-6 h-6 bg-white/20 rounded-sm" />
+                <span className="text-white/70">Occupied</span>
               </div>
             </div>
             
@@ -285,12 +285,12 @@ export default function SeatSelection() {
               {/* Classic Section */}
               <div>
                 <div className="text-center mb-4">
-                  <span className="font-bold text-gray-700">CLASSIC FULL</span>
-                  <span className="text-gray-500 ml-2">({sectionPrices.classic.toFixed(2)})</span>
+                  <span className="font-bold text-white">CLASSIC FULL</span>
+                  <span className="text-white/50 ml-2">(LKR {sectionPrices.classic.toFixed(2)})</span>
                 </div>
                 {Object.entries(seatsBySection.classic).map(([row, rowSeats]) => (
                   <div key={row} className="flex items-center justify-center gap-2 mb-2">
-                    <span className="w-6 text-center text-sm font-medium text-gray-500">{row}</span>
+                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
                     <div className="flex gap-1">
                       {rowSeats.sort((a, b) => b.number - a.number).map(seat => (
                         <button
@@ -299,16 +299,16 @@ export default function SeatSelection() {
                           disabled={seat.status === "occupied"}
                           className={cn(
                             "w-7 h-7 text-xs font-medium rounded-sm transition-all",
-                            seat.status === "available" && "bg-white border-2 border-gray-400 hover:border-amber-500 text-gray-700",
-                            seat.status === "selected" && "bg-amber-400 border-2 border-amber-500 text-gray-900",
-                            seat.status === "occupied" && "bg-gray-300 text-gray-400 cursor-not-allowed"
+                            seat.status === "available" && "bg-transparent border-2 border-white/40 hover:border-primary text-white/70",
+                            seat.status === "selected" && "bg-primary border-2 border-primary text-white",
+                            seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed"
                           )}
                         >
                           {seat.number}
                         </button>
                       ))}
                     </div>
-                    <span className="w-6 text-center text-sm font-medium text-gray-500">{row}</span>
+                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
                   </div>
                 ))}
               </div>
@@ -316,12 +316,12 @@ export default function SeatSelection() {
               {/* Prime Section */}
               <div>
                 <div className="text-center mb-4">
-                  <span className="font-bold text-gray-700">PRIME FULL</span>
-                  <span className="text-gray-500 ml-2">({sectionPrices.prime.toFixed(2)})</span>
+                  <span className="font-bold text-white">PRIME FULL</span>
+                  <span className="text-white/50 ml-2">(LKR {sectionPrices.prime.toFixed(2)})</span>
                 </div>
                 {Object.entries(seatsBySection.prime).map(([row, rowSeats]) => (
                   <div key={row} className="flex items-center justify-center gap-2 mb-2">
-                    <span className="w-6 text-center text-sm font-medium text-gray-500">{row}</span>
+                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
                     <div className="flex gap-1">
                       {rowSeats.sort((a, b) => b.number - a.number).map(seat => (
                         <button
@@ -330,16 +330,16 @@ export default function SeatSelection() {
                           disabled={seat.status === "occupied"}
                           className={cn(
                             "w-7 h-7 text-xs font-medium rounded-sm transition-all",
-                            seat.status === "available" && "bg-white border-2 border-gray-400 hover:border-amber-500 text-gray-700",
-                            seat.status === "selected" && "bg-amber-400 border-2 border-amber-500 text-gray-900",
-                            seat.status === "occupied" && "bg-gray-300 text-gray-400 cursor-not-allowed"
+                            seat.status === "available" && "bg-transparent border-2 border-white/40 hover:border-primary text-white/70",
+                            seat.status === "selected" && "bg-primary border-2 border-primary text-white",
+                            seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed"
                           )}
                         >
                           {seat.number}
                         </button>
                       ))}
                     </div>
-                    <span className="w-6 text-center text-sm font-medium text-gray-500">{row}</span>
+                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
                   </div>
                 ))}
               </div>
@@ -347,12 +347,12 @@ export default function SeatSelection() {
               {/* Superior Section */}
               <div>
                 <div className="text-center mb-4">
-                  <span className="font-bold text-gray-700">SUPERIOR FULL</span>
-                  <span className="text-gray-500 ml-2">({sectionPrices.superior.toFixed(2)})</span>
+                  <span className="font-bold text-white">SUPERIOR FULL</span>
+                  <span className="text-white/50 ml-2">(LKR {sectionPrices.superior.toFixed(2)})</span>
                 </div>
                 {Object.entries(seatsBySection.superior).map(([row, rowSeats]) => (
                   <div key={row} className="flex items-center justify-center gap-2 mb-2">
-                    <span className="w-6 text-center text-sm font-medium text-gray-500">{row}</span>
+                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
                     <div className="flex gap-1">
                       {rowSeats.sort((a, b) => b.number - a.number).map(seat => (
                         <button
@@ -361,16 +361,16 @@ export default function SeatSelection() {
                           disabled={seat.status === "occupied"}
                           className={cn(
                             "w-7 h-7 text-xs font-medium rounded-sm transition-all",
-                            seat.status === "available" && "bg-white border-2 border-gray-400 hover:border-amber-500 text-gray-700",
-                            seat.status === "selected" && "bg-amber-400 border-2 border-amber-500 text-gray-900",
-                            seat.status === "occupied" && "bg-gray-300 text-gray-400 cursor-not-allowed"
+                            seat.status === "available" && "bg-transparent border-2 border-white/40 hover:border-primary text-white/70",
+                            seat.status === "selected" && "bg-primary border-2 border-primary text-white",
+                            seat.status === "occupied" && "bg-white/20 text-white/30 cursor-not-allowed"
                           )}
                         >
                           {seat.number}
                         </button>
                       ))}
                     </div>
-                    <span className="w-6 text-center text-sm font-medium text-gray-500">{row}</span>
+                    <span className="w-6 text-center text-sm font-medium text-white/50">{row}</span>
                   </div>
                 ))}
               </div>
@@ -380,9 +380,9 @@ export default function SeatSelection() {
       </div>
       
       {/* Booking Summary Sidebar */}
-      <div className="w-80 bg-[#1a1a2e] text-white flex flex-col shrink-0 hidden lg:flex">
+      <div className="w-80 bg-[#0B0D14] border-l border-white/10 text-white flex flex-col shrink-0 hidden lg:flex">
         <div className="p-4 border-b border-white/10">
-          <h2 className="text-lg font-bold">Booking Summary</h2>
+          <h2 className="text-lg font-bold text-primary">Booking Summary</h2>
         </div>
         
         <div className="p-4 flex-1 overflow-auto">
@@ -391,32 +391,32 @@ export default function SeatSelection() {
             <img 
               src={movie.poster} 
               alt={movie.title}
-              className="w-16 h-24 object-cover rounded-lg"
+              className="w-16 h-24 object-cover rounded-lg border border-white/10"
             />
             <div className="flex-1">
-              <h3 className="font-bold text-sm uppercase">{movie.title}</h3>
-              <p className="text-xs text-gray-400 mt-1">
-                ({movie.rating}) • {movie.genre.join(', ')} • {movie.language}
+              <h3 className="font-bold text-sm uppercase text-white">{movie.title}</h3>
+              <p className="text-xs text-white/60 mt-1">
+                (U) • {movie.genre.join(' • ')} • {movie.language}
               </p>
-              <p className="text-xs text-gray-300 mt-2">
+              <p className="text-xs text-white/80 mt-2">
                 {dates[selectedDateIndex].dayName.slice(0, 3)}, {dates[selectedDateIndex].day} {dates[selectedDateIndex].month}, {selectedTime}
               </p>
-              <p className="text-xs text-gray-400 mt-1">{cinemaName}</p>
+              <p className="text-xs text-white/50 mt-1">{cinemaName}</p>
             </div>
           </div>
           
           {/* Seat Info */}
           {selectedSeats.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-xs text-gray-400 mb-2">SEAT INFO</h4>
-              <p className="text-sm font-medium text-amber-400 mb-2">
+              <h4 className="text-xs text-white/50 mb-2">SEAT INFO</h4>
+              <p className="text-sm font-medium text-primary mb-2">
                 {selectedSeats[0]?.section.toUpperCase()} FULL
               </p>
               <div className="flex flex-wrap gap-2">
                 {selectedSeats.map(seat => (
                   <span 
                     key={seat.id}
-                    className="px-3 py-1 bg-gray-700 rounded text-sm font-medium"
+                    className="px-3 py-1 bg-white/10 border border-white/20 rounded text-sm font-medium"
                   >
                     {seat.id}
                   </span>
@@ -428,10 +428,10 @@ export default function SeatSelection() {
           {/* Tickets */}
           {selectedSeats.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-xs text-gray-400 mb-2">TICKETS</h4>
+              <h4 className="text-xs text-white/50 mb-2">TICKETS</h4>
               <div className="flex justify-between text-sm">
-                <span>{selectedSeats.length} x {sectionPrices[selectedSeats[0]?.section || 'classic']}</span>
-                <span>LKR {ticketTotal.toLocaleString()}.00</span>
+                <span className="text-white/80">{selectedSeats.length} x {sectionPrices[selectedSeats[0]?.section || 'classic']}</span>
+                <span className="text-white">LKR {ticketTotal.toLocaleString()}.00</span>
               </div>
             </div>
           )}
@@ -439,10 +439,10 @@ export default function SeatSelection() {
           {/* Payment Details */}
           {selectedSeats.length > 0 && (
             <div>
-              <h4 className="text-xs text-gray-400 mb-2">PAYMENT DETAILS</h4>
+              <h4 className="text-xs text-white/50 mb-2">PAYMENT DETAILS</h4>
               <div className="flex justify-between text-sm">
-                <span>Sub Total</span>
-                <span>LKR {ticketTotal.toLocaleString()}.00</span>
+                <span className="text-white/80">Sub Total</span>
+                <span className="text-white">LKR {ticketTotal.toLocaleString()}.00</span>
               </div>
             </div>
           )}
@@ -451,12 +451,12 @@ export default function SeatSelection() {
         {/* Footer */}
         <div className="p-4 border-t border-white/10">
           <div className="flex justify-between mb-4">
-            <span className="font-bold">Grand Total</span>
-            <span className="font-bold">LKR {ticketTotal.toLocaleString()}.00</span>
+            <span className="font-bold text-white">Grand Total</span>
+            <span className="font-bold text-primary">LKR {ticketTotal.toLocaleString()}.00</span>
           </div>
           <Button 
             onClick={handleProceed}
-            className="w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold py-3"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3"
             disabled={selectedSeats.length === 0}
           >
             Proceed
@@ -465,17 +465,17 @@ export default function SeatSelection() {
       </div>
       
       {/* Mobile Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#1a1a2e] text-white p-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0B0D14] border-t border-white/10 text-white p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-white/50">
               {selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected
             </p>
-            <p className="font-bold">LKR {ticketTotal.toLocaleString()}.00</p>
+            <p className="font-bold text-primary">LKR {ticketTotal.toLocaleString()}.00</p>
           </div>
           <Button 
             onClick={handleProceed}
-            className="bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold px-8"
+            className="bg-primary hover:bg-primary/90 text-white font-bold px-8"
             disabled={selectedSeats.length === 0}
           >
             Proceed

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Star, Clock, Calendar, Globe } from "lucide-react";
 import { Movie } from "@/data/movies";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const demoBackdrops = [
 ];
 
 export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalProps) {
+  const navigate = useNavigate();
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Extend movie with demo data
@@ -176,6 +178,10 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                 </div>
                 <div className="md:w-48 flex-shrink-0">
                   <Button
+                    onClick={() => {
+                      onClose();
+                      navigate(`/movie-booking?movie=${extendedMovie.id}`);
+                    }}
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
                   >
                     Book Now

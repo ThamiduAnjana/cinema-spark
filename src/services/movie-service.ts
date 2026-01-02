@@ -37,7 +37,7 @@ export function formatRuntime(minutes: number | null): string {
 }
 
 // Transform API movie to component-friendly format
-export function transformApiMovie(movie: ApiMovie) {
+export function transformApiMovie(movie: ApiMovie, movieType?: MovieType) {
   return {
     id: String(movie.id),
     title: movie.title,
@@ -54,7 +54,9 @@ export function transformApiMovie(movie: ApiMovie) {
     galleryImages: movie.gallery_medias?.map((m) => m.url) || [],
     cast: movie.cast_details || [],
     crew: movie.crew_details || [],
+    productionCompanies: movie.production_companies || [],
     trailerUrl: movie.trailer_url,
+    movieType: movie.type || movieType || "now_showing",
   };
 }
 

@@ -22,6 +22,13 @@ export interface CrewMember {
   profile_path: string | null;
 }
 
+export interface ProductionCompany {
+  id: number;
+  name: string;
+  logo_path: string | null;
+  origin_country?: string;
+}
+
 export interface ApiMovie {
   id: number;
   title: string;
@@ -37,7 +44,9 @@ export interface ApiMovie {
   gallery_medias: MediaFile[];
   cast_details: CastMember[];
   crew_details?: CrewMember[];
+  production_companies?: ProductionCompany[];
   trailer_url: string | null;
+  type?: MovieType;
 }
 
 export interface PaginationMeta {

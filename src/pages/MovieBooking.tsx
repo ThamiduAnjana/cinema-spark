@@ -28,7 +28,9 @@ function toTransformedMovie(movie: Movie): TransformedMovie {
     galleryImages: [],
     cast: [],
     crew: [],
+    productionCompanies: [],
     trailerUrl: movie.trailerUrl || null,
+    movieType: "now_showing",
   };
 }
 // Cinema data with showtimes

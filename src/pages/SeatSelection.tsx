@@ -228,7 +228,7 @@ export default function SeatSelection() {
                 "w-12 h-14 md:w-14 md:h-16 text-xs font-bold rounded-md transition-all flex flex-col items-center justify-center gap-0.5",
                 seat.status === "available" && isVVIP && "bg-[#4A0E63] text-white hover:opacity-80",
                 seat.status === "available" && !isVVIP && "bg-[#EFBF04] text-gray-900 hover:opacity-80",
-                seat.status === "selected" && "bg-[#1e40af] text-white ring-2 ring-white",
+                seat.status === "selected" && "bg-primary text-white ring-2 ring-white",
                 seat.status === "occupied" && "bg-gray-600/50 text-gray-400 cursor-not-allowed"
               )}
             >
@@ -438,7 +438,7 @@ export default function SeatSelection() {
                 <span className="text-white/70">VIP (2,400)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#1e40af] rounded-md" />
+                <div className="w-8 h-8 bg-primary rounded-md" />
                 <span className="text-white/70">Selected</span>
               </div>
               <div className="flex items-center gap-2">

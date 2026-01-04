@@ -1,5 +1,6 @@
 export interface Movie {
   id: string;
+  movie_ref?: string;
   title: string;
   poster: string;
   backdrop: string;

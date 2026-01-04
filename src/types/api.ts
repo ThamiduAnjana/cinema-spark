@@ -31,6 +31,7 @@ export interface ProductionCompany {
 
 export interface ApiMovie {
   id: number;
+  movie_ref: string;
   title: string;
   tagline: string | null;
   description: string | null;

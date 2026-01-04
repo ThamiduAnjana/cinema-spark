@@ -290,13 +290,6 @@ export default function SeatSelection() {
     setShowBookingForm(true);
   };
 
-  const handleBookingSuccess = (invoiceData: any) => {
-    setShowBookingForm(false);
-    console.log("Invoice created:", invoiceData);
-    // Navigate to confirmation page or show success message
-    alert(`Booking confirmed!\nInvoice: ${invoiceData.invoice.invoiceNumber}\nTotal: LKR ${invoiceData.invoice.payment.total.toLocaleString()}`);
-  };
-
   const bookingData = {
     movieId,
     movieTitle: movie.title,
@@ -310,6 +303,21 @@ export default function SeatSelection() {
       price: seat.section.price,
     })),
     total: ticketTotal,
+  };
+
+  const handleBookingSuccess = (invoiceData: any) => {
+    setShowBookingForm(false);
+    console.log("Invoice created:", invoiceData);
+    
+    // Navigate to confirmation page with booking data
+    navigate("/booking-confirmation", {
+      state: {
+        invoiceId: invoiceData.invoice.invoiceNumber,
+        customer: invoiceData.invoice.customer,
+        booking: bookingData,
+        createdAt: invoiceData.invoice.createdAt,
+      }
+    });
   };
 
   // Group selected seats by section for display

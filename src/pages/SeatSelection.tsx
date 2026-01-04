@@ -177,7 +177,8 @@ export default function SeatSelection() {
   const [selectedDateIndex] = useState(0);
 
   // Find the movie from our data
-  const movie = movieId === "1" ? featuredMovie : nowShowingMovies.find((m) => m.id === movieId) || featuredMovie;
+  const movie =
+    movieId === "1" ? featuredMovie : nowShowingMovies.find((m) => m.movie_ref === movieId) || featuredMovie;
 
   // Get selected seats
   const selectedSeats = useMemo(() => seats.filter((seat) => seat.status === "selected"), [seats]);

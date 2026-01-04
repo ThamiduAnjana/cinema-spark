@@ -58,11 +58,9 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
   // Filter crew by known departments
   const getCrewByDepartment = () => {
     if (!movie.crew || movie.crew.length === 0) return [];
-    
+
     const departments = ["Directing", "Production", "Writing", "Sound", "Camera"];
-    return movie.crew.filter((member) =>
-      departments.some((dept) => member.department?.includes(dept))
-    );
+    return movie.crew.filter((member) => departments.some((dept) => member.department?.includes(dept)));
   };
 
   const displayedCrew = getCrewByDepartment().slice(0, 4);
@@ -70,10 +68,7 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
-        onClick={handleBackdropClick}
-      >
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" onClick={handleBackdropClick}>
         {/* Backdrop overlay */}
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
 
@@ -129,11 +124,11 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                     {/* Title and meta */}
                     <div className="flex-1">
                       {/* Movie Type Badge */}
-                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold mb-2 ${
-                        isUpcoming 
-                          ? "bg-amber-500 text-black" 
-                          : "bg-green-600 text-white"
-                      }`}>
+                      <div
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-bold mb-2 ${
+                          isUpcoming ? "bg-amber-500 text-black" : "bg-green-600 text-white"
+                        }`}
+                      >
                         {isUpcoming ? (
                           <>
                             <CalendarClock className="w-3 h-3" />
@@ -146,13 +141,11 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                           </>
                         )}
                       </div>
-                      
+
                       <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg mb-1">
                         {movie.title}
                       </h1>
-                      {movie.tagline && (
-                        <p className="text-white/70 text-sm italic mb-3">{movie.tagline}</p>
-                      )}
+                      {movie.tagline && <p className="text-white/70 text-sm italic mb-3">{movie.tagline}</p>}
                       <div className="flex flex-wrap items-center gap-3 md:gap-4 text-white/90 text-sm">
                         {movie.rating > 0 && (
                           <div className="flex items-center gap-1 bg-primary/90 px-2 py-1 rounded">
@@ -196,15 +189,13 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                 <section className="flex flex-col md:flex-row gap-6">
                   <div className="flex-1">
                     <h2 className="text-lg font-bold text-gray-900 mb-3">Synopsis</h2>
-                    <p className="text-gray-700 leading-relaxed">
-                      {movie.description || "No synopsis available."}
-                    </p>
+                    <p className="text-gray-700 leading-relaxed">{movie.description || "No synopsis available."}</p>
                   </div>
                   <div className="md:w-48 flex-shrink-0 space-y-3">
                     <Button
                       onClick={() => {
                         onClose();
-                        navigate(`/movie-booking?movie=${movie.id}`);
+                        navigate(`/movie-booking?movie=${movie.movie_ref}`);
                       }}
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
                     >
@@ -232,8 +223,8 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                     </h2>
                     <div className="flex flex-wrap gap-4">
                       {movie.productionCompanies.map((company) => (
-                        <div 
-                          key={company.id} 
+                        <div
+                          key={company.id}
                           className="flex items-center gap-3 bg-white/60 px-4 py-3 rounded-lg border border-gray-200"
                         >
                           {company.logo_path ? (
@@ -242,7 +233,7 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                               alt={company.name}
                               className="h-8 w-auto max-w-[80px] object-contain"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).style.display = "none";
                               }}
                             />
                           ) : (
@@ -278,14 +269,8 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                               }}
                             />
                           </div>
-                          <p className="text-xs font-medium text-gray-900 line-clamp-2">
-                            {actor.name}
-                          </p>
-                          {actor.character && (
-                            <p className="text-xs text-gray-500 line-clamp-1">
-                              {actor.character}
-                            </p>
-                          )}
+                          <p className="text-xs font-medium text-gray-900 line-clamp-2">{actor.name}</p>
+                          {actor.character && <p className="text-xs text-gray-500 line-clamp-1">{actor.character}</p>}
                         </div>
                       ))}
                     </div>
@@ -311,9 +296,7 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
                             />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {member.name}
-                            </p>
+                            <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
                             <p className="text-xs text-gray-500">{member.job}</p>
                           </div>
                         </div>
@@ -365,10 +348,10 @@ export function MovieDetailsModal({ movie, isOpen, onClose }: MovieDetailsModalP
 
               {/* Mobile sticky Book Now */}
               <div className="md:hidden sticky bottom-0 p-4 bg-[#FFF3DC] border-t border-gray-200">
-                <Button 
+                <Button
                   onClick={() => {
                     onClose();
-                    navigate(`/movie-booking?movie=${movie.id}`);
+                    navigate(`/movie-booking?movie=${movie.movie_ref}`);
                   }}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 rounded-lg"
                 >

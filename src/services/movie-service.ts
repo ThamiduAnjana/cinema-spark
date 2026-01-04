@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "@/lib/api-config";
+import { API_ENDPOINTS, getAuthHeaders } from "@/lib/api-config";
 import { MoviesApiResponse, MovieType, ApiMovie } from "@/types/api";
 
 interface FetchMoviesParams {
@@ -17,7 +17,9 @@ export async function fetchMovies({
   url.searchParams.set("per_page", String(perPage));
   url.searchParams.set("type", type);
 
-  const response = await fetch(url.toString());
+  const response = await fetch(url.toString(), {
+    headers: getAuthHeaders(),
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch movies: ${response.status} ${response.statusText}`);

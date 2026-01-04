@@ -1,79 +1,15 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft, User, ArrowLeft } from "lucide-react";
+import { ChevronRight, Play, MapPin, Heart, Navigation, ChevronLeft, User, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { nowShowingMovies, featuredMovie, Movie } from "@/data/movies";
 import { Footer } from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { MovieCard } from "@/components/MovieCard";
-import { TransformedMovie } from "@/services/movie-service";
-
-// Helper to convert legacy Movie type to TransformedMovie for MovieCard compatibility
-function toTransformedMovie(movie: Movie): TransformedMovie {
-  return {
-    id: movie.id,
-    title: movie.title,
-    tagline: null,
-    description: movie.description,
-    runtime: movie.duration,
-    runtimeMinutes: null,
-    language: movie.language,
-    rating: movie.rating,
-    releaseDate: movie.releaseDate,
-    genres: movie.genre,
-    poster: movie.poster,
-    backdrop: movie.backdrop,
-    galleryImages: [],
-    cast: [],
-    crew: [],
-    productionCompanies: [],
-    trailerUrl: movie.trailerUrl || null,
-    movieType: "now_showing",
-  };
-}
-// Cinema data with showtimes
-const cinemaData = [
-  {
-    id: "1",
-    name: "SAS Plaza Cinemas",
-    address: "SAS Plaza Mall, Trincomalee, Sri Lanka",
-    distance: "2.5 km away",
-    formats: [
-      {
-        name: "Standard",
-        showtimes: [
-          { time: "07:00 PM", language: "ENGLISH", available: true },
-          { time: "10:45 PM", language: "TAMIL", available: true, fillingFast: true },
-        ]
-      },
-      {
-        name: "[ATMOS]",
-        showtimes: [
-          { time: "02:30 PM", language: "ENGLISH -3D", available: true },
-          { time: "04:35 PM", language: "ENGLISH", available: true },
-          { time: "06:30 PM", language: "ENGLISH -3D", available: true, fillingFast: true },
-          { time: "10:30 PM", language: "ENGLISH -3D", available: false },
-        ]
-      },
-      {
-        name: "LUXE",
-        showtimes: [
-          { time: "02:15 PM", language: "ENGLISH -3D", available: true },
-          { time: "06:15 PM", language: "ENGLISH -3D", available: true },
-          { time: "10:05 PM", language: "ENGLISH -3D", available: true },
-          { time: "10:35 PM", language: "ENGLISH", available: true },
-        ]
-      }
-    ]
-  }
-];
-
-// Also showing movies - filter out current movie
-const getAlsoShowingMovies = (currentMovieId: string) => {
-  return nowShowingMovies.filter(m => m.id !== currentMovieId).slice(0, 5);
-};
+import { useDisplayLayout } from "@/hooks/use-display-layout";
+import { useNowShowingMovies } from "@/hooks/use-movies";
+import { formatRuntime, TransformedMovie } from "@/services/movie-service";
 
 // Generate dates for the next 7 days
 const generateDates = () => {
@@ -89,6 +25,7 @@ const generateDates = () => {
     
     dates.push({
       id: i.toString(),
+      date: date,
       month: monthNames[date.getMonth()],
       day: date.getDate().toString().padStart(2, '0'),
       dayName: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()],
@@ -101,18 +38,48 @@ const generateDates = () => {
 export default function MovieBooking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const movieId = searchParams.get('movie') || '1';
+  const movieRef = searchParams.get('movie') || '';
   
-  const [selectedDate, setSelectedDate] = useState("0");
-  const [dates] = useState(generateDates);
-  
-  // Find the movie from our data
-  const movie = movieId === '1' ? featuredMovie : nowShowingMovies.find(m => m.id === movieId) || featuredMovie;
+  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+  const dates = useMemo(() => generateDates(), []);
+  const selectedDate = dates[selectedDateIndex]?.date || new Date();
 
-  const handleTimeslotClick = (cinema: string, format: string, time: string, language: string) => {
-    // Navigate to seat selection page with all relevant params
-    navigate(`/select-seats?movie=${movieId}&cinema=${encodeURIComponent(cinema)}&time=${encodeURIComponent(time)}&format=${encodeURIComponent(format)}&language=${encodeURIComponent(language)}`);
+  // Fetch display layout from API
+  const { movie, cinemas, isLoading, isError } = useDisplayLayout({
+    movieRef,
+    layoutId: "3",
+    date: selectedDate,
+    enabled: !!movieRef,
+  });
+
+  // Fetch now showing movies for "Also Showing" section
+  const { movies: nowShowingMovies } = useNowShowingMovies(1, 6);
+  
+  // Filter out current movie from "Also Showing"
+  const alsoShowingMovies = nowShowingMovies.filter(m => m.id !== movieRef);
+
+  const handleTimeslotClick = (cinema: string, format: string, time: string, language: string, timeSlotId?: number) => {
+    navigate(`/select-seats?movie=${movieRef}&cinema=${encodeURIComponent(cinema)}&time=${encodeURIComponent(time)}&format=${encodeURIComponent(format)}&language=${encodeURIComponent(language)}${timeSlotId ? `&timeSlotId=${timeSlotId}` : ''}`);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0B0D14] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError || !movie) {
+    return (
+      <div className="min-h-screen bg-[#0B0D14] flex flex-col items-center justify-center gap-4">
+        <p className="text-white/70">Failed to load movie details</p>
+        <Button onClick={() => navigate('/')}>Go Home</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0D14]">
@@ -164,7 +131,7 @@ export default function MovieBooking() {
         <div 
           className="absolute inset-0 h-[350px]"
           style={{
-            backgroundImage: `url(${movie.backdrop})`,
+            backgroundImage: movie.backdrop_url ? `url(${movie.backdrop_url})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -178,7 +145,7 @@ export default function MovieBooking() {
             {/* Poster */}
             <div className="relative shrink-0 group">
               <img 
-                src={movie.poster} 
+                src={movie.poster_url || ''} 
                 alt={movie.title}
                 className="w-36 md:w-44 h-auto rounded-lg shadow-2xl object-cover aspect-[2/3]"
               />
@@ -197,20 +164,22 @@ export default function MovieBooking() {
               
               <div className="flex flex-wrap items-center gap-3 text-sm text-white/70 mb-4">
                 <Badge variant="outline" className="border-white/30 text-white bg-white/5">
-                  U
+                  {movie.certificate || 'U'}
                 </Badge>
-                <span>{movie.duration}</span>
+                <span>{formatRuntime(movie.runtime)}</span>
                 <span className="w-1 h-1 rounded-full bg-white/40" />
-                <span>{movie.releaseDate}</span>
+                <span>{movie.release_date}</span>
                 <span className="w-1 h-1 rounded-full bg-white/40" />
-                <span>{movie.genre.join(', ')}</span>
+                <span>{movie.genres?.join(', ')}</span>
                 <span className="w-1 h-1 rounded-full bg-white/40" />
                 <span>{movie.language}</span>
               </div>
               
-              <Badge className="bg-primary text-white hover:bg-primary/90 mb-4">
-                LIVE
-              </Badge>
+              {movie.is_live && (
+                <Badge className="bg-primary text-white hover:bg-primary/90 mb-4">
+                  LIVE
+                </Badge>
+              )}
               
               <button className="block text-primary hover:underline text-sm">
                 View Details
@@ -224,13 +193,13 @@ export default function MovieBooking() {
       <section className="bg-[#0B0D14] border-b border-white/10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {dates.map((date) => (
+            {dates.map((date, index) => (
               <button
                 key={date.id}
-                onClick={() => setSelectedDate(date.id)}
+                onClick={() => setSelectedDateIndex(index)}
                 className={cn(
                   "flex flex-col items-center px-4 py-3 rounded-lg min-w-[80px] transition-all",
-                  selectedDate === date.id 
+                  selectedDateIndex === index 
                     ? "bg-primary text-white" 
                     : "bg-white/5 text-white/70 hover:bg-white/10"
                 )}
@@ -276,62 +245,70 @@ export default function MovieBooking() {
       {/* Cinema Listings */}
       <section className="py-6">
         <div className="container mx-auto px-4">
-          {cinemaData.map((cinema) => (
-            <div key={cinema.id} className="bg-[#1A1D25] border border-white/10 rounded-xl overflow-hidden mb-6">
-              {/* Cinema Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/10">
-                <div>
-                  <h3 className="font-bold text-white">{cinema.name}</h3>
-                  <p className="text-xs text-white/50">{cinema.address}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-white/50">{cinema.distance}</span>
-                  <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <Navigation className="w-4 h-4 text-white/60" />
-                  </button>
-                  <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <Heart className="w-4 h-4 text-white/60" />
-                  </button>
-                </div>
-              </div>
-              
-              {/* Showtimes */}
-              <div className="p-4 space-y-6">
-                {cinema.formats.map((format) => (
-                  <div key={format.name}>
-                    <h4 className="text-xs font-bold text-white/70 mb-3">{format.name}</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {format.showtimes.map((showtime, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => showtime.available && handleTimeslotClick(cinema.name, format.name, showtime.time, showtime.language)}
-                          disabled={!showtime.available}
-                          className={cn(
-                            "flex flex-col items-center px-4 py-2 rounded-lg border-2 min-w-[100px] transition-all",
-                            showtime.available 
-                              ? showtime.fillingFast
-                                ? "border-primary/80 bg-primary/10 hover:bg-primary/20 cursor-pointer"
-                                : "border-green-500/80 bg-green-500/10 hover:bg-green-500/20 cursor-pointer"
-                              : "border-white/20 bg-white/5 cursor-not-allowed opacity-50"
-                          )}
-                        >
-                          <span className="text-[10px] text-white/60 font-medium">{showtime.language}</span>
-                          <span className={cn(
-                            "text-sm font-bold",
-                            showtime.available 
-                              ? showtime.fillingFast ? "text-primary" : "text-green-500"
-                              : "text-white/30"
-                          )}>
-                            {showtime.time}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {cinemas.length === 0 ? (
+            <div className="text-center py-12 text-white/60">
+              No showtimes available for this date
             </div>
-          ))}
+          ) : (
+            cinemas.map((cinema) => (
+              <div key={cinema.id} className="bg-[#1A1D25] border border-white/10 rounded-xl overflow-hidden mb-6">
+                {/* Cinema Header */}
+                <div className="flex items-center justify-between p-4 border-b border-white/10">
+                  <div>
+                    <h3 className="font-bold text-white">{cinema.name}</h3>
+                    <p className="text-xs text-white/50">{cinema.address}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {cinema.distance && (
+                      <span className="text-xs text-white/50">{cinema.distance}</span>
+                    )}
+                    <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                      <Navigation className="w-4 h-4 text-white/60" />
+                    </button>
+                    <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                      <Heart className="w-4 h-4 text-white/60" />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Showtimes */}
+                <div className="p-4 space-y-6">
+                  {cinema.formats.map((format) => (
+                    <div key={format.name}>
+                      <h4 className="text-xs font-bold text-white/70 mb-3">{format.name}</h4>
+                      <div className="flex flex-wrap gap-3">
+                        {format.showtimes.map((showtime, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => showtime.available && handleTimeslotClick(cinema.name, format.name, showtime.time, showtime.language, showtime.id)}
+                            disabled={!showtime.available}
+                            className={cn(
+                              "flex flex-col items-center px-4 py-2 rounded-lg border-2 min-w-[100px] transition-all",
+                              showtime.available 
+                                ? showtime.filling_fast
+                                  ? "border-primary/80 bg-primary/10 hover:bg-primary/20 cursor-pointer"
+                                  : "border-green-500/80 bg-green-500/10 hover:bg-green-500/20 cursor-pointer"
+                                : "border-white/20 bg-white/5 cursor-not-allowed opacity-50"
+                            )}
+                          >
+                            <span className="text-[10px] text-white/60 font-medium">{showtime.language}</span>
+                            <span className={cn(
+                              "text-sm font-bold",
+                              showtime.available 
+                                ? showtime.filling_fast ? "text-primary" : "text-green-500"
+                                : "text-white/30"
+                            )}>
+                              {showtime.time}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -351,8 +328,8 @@ export default function MovieBooking() {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {getAlsoShowingMovies(movieId).map((movie) => (
-              <MovieCard key={movie.id} movie={toTransformedMovie(movie)} />
+            {alsoShowingMovies.slice(0, 5).map((m) => (
+              <MovieCard key={m.id} movie={m} />
             ))}
           </div>
         </div>

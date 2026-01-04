@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { nowShowingMovies, featuredMovie } from "@/data/movies";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BookingFormModal } from "@/components/BookingFormModal";
 import {
   Tooltip,
   TooltipContent,
@@ -159,6 +160,7 @@ export default function SeatSelection() {
   const [selectedTime, setSelectedTime] = useState(initialTime);
   const [dates] = useState(generateDates);
   const [selectedDateIndex] = useState(0);
+  const [showBookingForm, setShowBookingForm] = useState(false);
   
   // Find the movie from our data
   const movie = movieId === '1' ? featuredMovie : nowShowingMovies.find(m => m.id === movieId) || featuredMovie;
@@ -285,7 +287,29 @@ export default function SeatSelection() {
       alert("Please select at least one seat");
       return;
     }
-    alert(`Proceeding to payment for ${selectedSeats.length} seats: ${selectedSeats.map(s => `${s.row_label}${s.seat_number}`).join(", ")}\nTotal: LKR ${ticketTotal.toLocaleString()}`);
+    setShowBookingForm(true);
+  };
+
+  const handleBookingSuccess = (invoiceData: any) => {
+    setShowBookingForm(false);
+    console.log("Invoice created:", invoiceData);
+    // Navigate to confirmation page or show success message
+    alert(`Booking confirmed!\nInvoice: ${invoiceData.invoice.invoiceNumber}\nTotal: LKR ${invoiceData.invoice.payment.total.toLocaleString()}`);
+  };
+
+  const bookingData = {
+    movieId,
+    movieTitle: movie.title,
+    cinema: cinemaName,
+    date: dates[selectedDateIndex].fullDate,
+    time: selectedTime,
+    seats: selectedSeats.map(seat => ({
+      seatId: seat.seat_id,
+      label: `${seat.row_label}${seat.seat_number}`,
+      section: seat.section.section_name,
+      price: seat.section.price,
+    })),
+    total: ticketTotal,
   };
 
   // Group selected seats by section for display
@@ -552,6 +576,14 @@ export default function SeatSelection() {
           </Button>
         </div>
       </div>
+
+      {/* Booking Form Modal */}
+      <BookingFormModal
+        isOpen={showBookingForm}
+        onClose={() => setShowBookingForm(false)}
+        onSuccess={handleBookingSuccess}
+        bookingData={bookingData}
+      />
     </div>
   );
 }

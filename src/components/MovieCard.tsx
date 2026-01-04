@@ -18,14 +18,14 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent modal from opening if clicking on Book Now button
     const target = e.target as HTMLElement;
-    if (target.closest('button')) return;
-    
+    if (target.closest("button")) return;
+
     setIsModalOpen(true);
   };
 
   const handleBookNow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/movie-booking?movie=${movie.id}`);
+    navigate(`/movie-booking?movie=${movie.movie_ref}`);
   };
 
   const isUpcoming = movie.movieType === "upcoming";
@@ -35,9 +35,7 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
       <div className="group cursor-pointer" onClick={handleCardClick}>
         <div className="relative overflow-hidden rounded-lg mb-3 card-hover">
           {/* Placeholder while image loads */}
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
-          )}
+          {!imageLoaded && <div className="absolute inset-0 bg-muted animate-pulse" />}
           <img
             src={movie.poster}
             alt={movie.title}
@@ -55,7 +53,7 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="absolute bottom-4 left-4 right-4">
-              <button 
+              <button
                 onClick={handleBookNow}
                 className="w-full py-2 bg-primary text-primary-foreground rounded-md font-semibold text-sm hover:bg-primary/90 transition-colors"
               >
@@ -71,11 +69,11 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
           )}
           {/* Movie Type Badge */}
           {showTypeBadge && (
-            <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 ${
-              isUpcoming 
-                ? "bg-amber-500 text-black" 
-                : "bg-green-600 text-white"
-            }`}>
+            <div
+              className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 ${
+                isUpcoming ? "bg-amber-500 text-black" : "bg-green-600 text-white"
+              }`}
+            >
               {isUpcoming ? (
                 <>
                   <CalendarClock className="w-3 h-3" />
@@ -103,11 +101,7 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
           </div>
           <div className="flex flex-wrap gap-1">
             {movie.genres.slice(0, 2).map((g) => (
-              <Badge
-                key={g}
-                variant="secondary"
-                className="text-xs font-normal"
-              >
+              <Badge key={g} variant="secondary" className="text-xs font-normal">
                 {g}
               </Badge>
             ))}
@@ -115,11 +109,7 @@ export function MovieCard({ movie, showTypeBadge = false }: MovieCardProps) {
         </div>
       </div>
 
-      <MovieDetailsModal
-        movie={movie}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <MovieDetailsModal movie={movie} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   );
 }
